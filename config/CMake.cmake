@@ -2,9 +2,7 @@
 set(CMAKE_REPO_URL https://github.com/Eyescale/CMake.git)
 set(CMAKE_REPO_TAG master)
 set(CMAKE_NOTEST ON)
-if(MSVC)
-  set(CMAKE_OPTIONAL ON)
-endif()
+set(CMAKE_OPTIONAL ON)
 
 set(CMAKE_EXTRA
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}

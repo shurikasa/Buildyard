@@ -1,3 +1,5 @@
+set(HWLOC_OPTIONAL ON)
+
 # can't autopain on Windows without too much hassle
 # can't build universal on OS X
 if(MSVC OR APPLE)
@@ -9,11 +11,10 @@ set(HWLOC_VERSION 1.4.0)
 set(HWLOC_REPO_URL https://github.com/marwan-abdellah/HWLOC)
 set(HWLOC_REPO_TAG display)
 set(HWLOC_DEPENDS NVCtrl)
-set(HWLOC_REPO_TYPE GIT)
 set(HWLOC_SOURCE "${CMAKE_SOURCE_DIR}/src/hwloc")
 set(HWLOC_NOPACKAGE ON)
 set(HWLOC_NOTEST ON)
-set(HWLOC_OPTIONAL ON)
+
 set(HWLOC_EXTRA
   PATCH_COMMAND cd ${HWLOC_SOURCE} && autoreconf -i
   CONFIGURE_COMMAND ${HWLOC_SOURCE}/configure  "--prefix=${CMAKE_CURRENT_BINARY_DIR}/install" CPPFLAGS=-I${CMAKE_CURRENT_BINARY_DIR}/install/include LDFLAGS=-L${CMAKE_CURRENT_BINARY_DIR}/install/lib
