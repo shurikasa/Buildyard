@@ -160,3 +160,8 @@ file:///Users/eilemann/Software/Buildyard/Build/install/ports/
 [...]
 sudo port install Equalizer +universal
 ```
+
+## Known issues
+
+* Boost build not automatically triggered on VS2010
+([#17](https://github.com/Eyescale/Buildyard/issues/17))
