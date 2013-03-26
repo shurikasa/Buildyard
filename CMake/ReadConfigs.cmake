@@ -18,6 +18,14 @@ macro(READ_CONFIG_DIR DIR)
     set_property(GLOBAL PROPERTY READ_CONFIG_DIR_${DIR} ON)
 
     set(READ_CONFIG_DIR_DEPENDS)
+    if(EXISTS ${DIR}/Buildyard.txt)
+      file(READ ${DIR}/Buildyard.txt BUILDYARD_REV)
+      string(REGEX REPLACE "\n" "" BUILDYARD_REV "${BUILDYARD_REV}")
+      execute_process(
+        COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        )
+    endif()
     if(EXISTS ${DIR}/depends.txt)
       file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
       string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
