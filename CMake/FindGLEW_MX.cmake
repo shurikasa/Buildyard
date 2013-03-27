@@ -11,15 +11,10 @@ find_library(_glew_mx_LIBRARY
 if(_glew_mx_INCLUDE_DIR AND _glew_mx_LIBRARY)
   set(TEST_SRC ${CMAKE_BINARY_DIR}/glew_test.cpp)
   file(WRITE ${TEST_SRC}
-    "#include <GL/glew.h>\n"
+    "#include <GL/glew.h>\n\n"
     "int main(int argc, char* argv[])\n"
-    "{\n"
-    "  glewContextInit(0);\n"
-    )
-  if(X11_FOUND)
-    file(APPEND ${TEST_SRC} "  glxewContextInit();\n")
-  endif()
-  file(APPEND ${TEST_SRC} "}\n")
+    "{\n glewContextInit(0);\n}\n"
+  )
 
   try_compile(_glew_mx_SUPPORTED ${CMAKE_BINARY_DIR}/glew_test ${TEST_SRC}
     CMAKE_FLAGS
@@ -44,3 +39,4 @@ set(GLEW_MX_LIBRARIES ${_glew_mx_LIBRARY})
 if(GLEW_MX_FOUND)
   message(STATUS "Found GLEW_MX in ${GLEW_MX_INCLUDE_DIRS};${GLEW_MX_LIBRARIES}")
 endif()
+
