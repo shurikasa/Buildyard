@@ -62,7 +62,7 @@ function(USE_EXTERNAL_DEPS name)
     "set(${NAME}_DEPENDS ${_deps})\n\n"
     "# Write defines.h and options.cmake\n"
     "if(NOT PROJECT_INCLUDE_NAME)\n"
-    "  set(PROJECT_INCLUDE_NAME ${CMAKE_PROJECT_NAME}\n"
+    "  set(PROJECT_INCLUDE_NAME \${CMAKE_PROJECT_NAME})\n"
     "endif()\n"
     "if(NOT OPTIONS_CMAKE)\n"
     "  set(OPTIONS_CMAKE \${CMAKE_BINARY_DIR}/options.cmake)\n"
