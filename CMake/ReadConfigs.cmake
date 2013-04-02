@@ -1,4 +1,3 @@
-
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 # Does a use_external(..) for each config*/*.cmake project.
 
@@ -13,7 +12,7 @@ endif()
 
 find_program(AUTORECONF_EXE autoreconf)
 if(NOT AUTORECONF_EXE)
-  message(FATAL_ERROR "the program 'autoreconf' could not be found")
+  message(FATAL_ERROR "autoreconf missing, install autoconf tools")
 endif()
 
 macro(READ_CONFIG_DIR DIR)
