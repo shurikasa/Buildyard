@@ -1,13 +1,14 @@
 
 set(LIBXML2_PACKAGE_VERSION 2.7)
-set(LIBXML2_REPO_URL git://git.gnome.org/libxml2)
-set(LIBXML2_REPO_TAG v2.8.0)
-set(LIBXML2_SOURCE "${CMAKE_SOURCE_DIR}/src/libxml2")
-set(LIBXML2_OPTIONAL ON)
 
 if(NOT MSVC)
   return()
 endif()
+
+set(LIBXML2_REPO_URL git://git.gnome.org/libxml2)
+set(LIBXML2_REPO_TAG v2.8.0)
+set(LIBXML2_SOURCE "${CMAKE_SOURCE_DIR}/src/libxml2")
+set(LIBXML2_OPTIONAL ON)
 
 set(LIBXML2_PREFIXPATH)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/install LIBXML2_PREFIXPATH)
