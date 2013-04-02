@@ -11,6 +11,11 @@ else()
   find_program(TAR_EXE tar)
 endif()
 
+find_program(AUTORECONF_EXE autoreconf)
+if(NOT AUTORECONF_EXE)
+  message(FATAL_ERROR "the program 'autoreconf' could not be found")
+endif()
+
 macro(READ_CONFIG_DIR DIR)
   get_property(READ_CONFIG_DIR_DONE GLOBAL PROPERTY READ_CONFIG_DIR_${DIR})
   if(NOT READ_CONFIG_DIR_DONE)
