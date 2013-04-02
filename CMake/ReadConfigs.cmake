@@ -11,7 +11,7 @@ else()
 endif()
 
 find_program(AUTORECONF_EXE autoreconf)
-if(NOT AUTORECONF_EXE)
+if(NOT MSVC AND NOT AUTORECONF_EXE)
   message(FATAL_ERROR "autoreconf missing, install autoconf tools")
 endif()
 
