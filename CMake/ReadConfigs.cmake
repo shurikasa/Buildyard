@@ -13,7 +13,12 @@ endif()
 
 find_program(AUTORECONF_EXE autoreconf)
 if(NOT MSVC AND NOT AUTORECONF_EXE)
-  message(FATAL_ERROR "autoreconf missing, install autoconf tools")
+  if(APPLE)
+    message(FATAL_ERROR
+      "autoreconf missing, install autoconf tools (sudo port install autoconf)")
+  else()
+    message(FATAL_ERROR "autoreconf missing, install autoconf tools")
+  endif()
 endif()
 
 macro(READ_CONFIG_DIR DIR)
