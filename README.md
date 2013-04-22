@@ -132,6 +132,10 @@ testing downstream projects after API changes.
 
 Builds all dependencies of the given project.
 
+### NAME-doxygen
+
+Builds doxygen documentation of the given project.
+
 ### NAME-reset
 
 Cleans all working changes in the project's source directory.
