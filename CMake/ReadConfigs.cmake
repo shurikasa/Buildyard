@@ -28,14 +28,14 @@ macro(READ_CONFIG_DIR DIR)
     set_property(GLOBAL PROPERTY READ_CONFIG_DIR_${DIR} ON)
 
     set(READ_CONFIG_DIR_DEPENDS)
-    if(EXISTS ${DIR}/Buildyard.txt)
+    if(EXISTS ${DIR}/Buildyard.txt) # deprecated, use Buildyard.cmake
       file(READ ${DIR}/Buildyard.txt BUILDYARD_REV)
       string(REGEX REPLACE "\n" "" BUILDYARD_REV "${BUILDYARD_REV}")
-      execute_process(
-        COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        )
     endif()
+    if(EXISTS ${DIR}/Buildyard.cmake)
+      include(${DIR}/Buildyard.cmake)
+    endif()
+
     if(EXISTS ${DIR}/depends.txt)
       file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
       string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
@@ -125,43 +125,50 @@ if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config.local)
 endif()
 
 set(_configdone)
-add_custom_target(update
-  COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
-  COMMENT "Updating Buildyard"
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+if(BUILDYARD_REV)
+  execute_process(
+    COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+  add_custom_target(update)
+else()
+  add_custom_target(update
+    COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
+    COMMENT "Updating Buildyard"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 
-if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local")
-  add_custom_target(config.local-update
-    COMMAND ${GIT_EXECUTABLE} pull
-    COMMENT "Updating config.local"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local"
-    )
-  add_dependencies(update config.local-update)
+  if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local")
+    add_custom_target(config.local-update
+      COMMAND ${GIT_EXECUTABLE} pull
+      COMMENT "Updating config.local"
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local"
+      )
+    add_dependencies(update config.local-update)
+  endif()
 endif()
 
 file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
 foreach(_dir ${_dirs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
     message(STATUS "Configuring ${_dir}")
+    get_filename_component(_dirName ${_dir} NAME)
 
-    string(REGEX REPLACE ".*\\.(.+)" "\\1" _group ${_dir})
-    if(_group STREQUAL _dir)
+    set(_dest "${_dir}")
+
+    string(REGEX REPLACE ".*\\.(.+)" "\\1" _group ${_dirName})
+    if(_group STREQUAL _dirName)
       set(_group)
     else()
       string(TOUPPER ${_group} _GROUP)
-      if(NOT ${_GROUP}_REPO_URL)
-        set(_group)
+      if(NOT ${_GROUP}_DOC_PROJECT AND ${_GROUP}_REPO_URL)
+        set(${_GROUP}_DOC_PROJECT "${_group}") # automagic doc project
       endif()
+      if(${_GROUP}_DOC_PROJECT) # set in config.group/Buildyard.cmake
+        set(_dest "${CMAKE_SOURCE_DIR}/src/${${_GROUP}_DOC_PROJECT}/images")
+      endif()
+      set(_group ${${_GROUP}_DOC_PROJECT})
     endif()
 
-    if(_group)
-      set(_dest "${CMAKE_SOURCE_DIR}/src/${_group}/images")
-    else()
-      set(_dest "${_dir}")
-    endif()
-
-    if(_dir MATCHES "config.")
-      get_filename_component(_dirName ${_dir} NAME)
+    if(NOT BUILDYARD_REV AND _dir MATCHES "config.")
       add_custom_target(${_dirName}-update
         COMMAND ${GIT_EXECUTABLE} pull
         COMMENT "Updating ${_dirName}"
@@ -176,7 +183,7 @@ foreach(_dir ${_dirs})
       string(REPLACE ".cmake" "" _config ${_configfile})
       get_filename_component(_config ${_config} NAME)
 
-      if(NOT _config STREQUAL "Release")
+      if(NOT _config STREQUAL "Buildyard")
         set(_configfound)
         list(FIND _configdone ${_config} _configfound)
         if(_configfound EQUAL -1)
@@ -219,7 +226,7 @@ if(TAR_EXE)
 endif()
 
 # make metarelease: package & module for selected projects specified
-# in config.*/Release.cmake
+# in config.*/Buildyard.cmake
 if(RELEASE_NAME)
   # metamodule
   if(MODULE_MODULEFILES)
