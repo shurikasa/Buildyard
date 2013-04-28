@@ -54,32 +54,6 @@ function(USE_EXTERNAL_CHANGE_ORIGIN name ORIGIN_URL USER_URL ORIGIN_RENAME)
   endif()
 endfunction()
 
-
-function(USE_EXTERNAL_GATHER_ARGS name)
-  # sets ${NAME}_ARGS on return, to be passed to CMake
-  string(TOUPPER ${name} NAME)
-
-  set(ARGS)
-  set(DEPENDS)
-  set(${UPPER_NAME}_ARGS)
-
-  # recurse to get dependency roots
-  foreach(proj ${${NAME}_DEPENDS})
-    use_external_gather_args(${proj})
-    string(TOUPPER ${proj} PROJ)
-    set(ARGS ${ARGS} ${${PROJ}_ARGS})
-  endforeach()
-
-  get_target_property(_check ${name} _EP_IS_EXTERNAL_PROJECT)
-  if(NOT _check EQUAL 1) # installed package
-    set(${NAME}_ARGS ${ARGS} PARENT_SCOPE) # return value
-    return()
-  endif()
-
-  set(${NAME}_ARGS ${ARGS} PARENT_SCOPE) # return value
-endfunction()
-
-
 function(USE_EXTERNAL_BUILDONLY name)
   ExternalProject_Get_Property(${name} binary_dir)
 
@@ -304,7 +278,6 @@ function(USE_EXTERNAL name)
 
   set(INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install")
   list(APPEND CMAKE_PREFIX_PATH ${INSTALL_PATH})
-  use_external_gather_args(${name})
   set(ARGS -DBUILDYARD:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}

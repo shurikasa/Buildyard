@@ -1,6 +1,22 @@
 
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 
+function(USE_EXTERNAL_GATHER_DEBS NAME)
+  # sets ${NAME}_DEBS from all dependencies on return
+  set(DEBS)
+  set(DEPENDS)
+  set(${UPPER_NAME}_DEBS)
+
+  # recurse to get dependency roots
+  foreach(proj ${${NAME}_DEPENDS})
+    string(TOUPPER ${proj} PROJ)
+    use_external_gather_debs(${PROJ})
+    list(APPEND DEBS ${${PROJ}_DEBS})
+  endforeach()
+
+  set(${NAME}_DEBS ${${NAME}_DEB_DEPENDS} ${DEBS} PARENT_SCOPE) # return value
+endfunction()
+
 # write in-source FindPackages.cmake, .travis.yml
 function(USE_EXTERNAL_DEPS name)
   string(TOUPPER ${name} NAME)
@@ -65,7 +81,9 @@ function(USE_EXTERNAL_DEPS name)
       endif()
     endif()
   endforeach()
-  foreach(_dep ${${NAME}_DEB_DEPENDS})
+
+  use_external_gather_debs(${NAME})
+  foreach(_dep ${${NAME}_DEBS})
     file(APPEND ${_ciIn} "${_dep} ")
   endforeach()
 
