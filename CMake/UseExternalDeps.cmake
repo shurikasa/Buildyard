@@ -14,7 +14,12 @@ function(USE_EXTERNAL_GATHER_DEBS NAME)
     list(APPEND DEBS ${${PROJ}_DEBS})
   endforeach()
 
-  set(${NAME}_DEBS ${${NAME}_DEB_DEPENDS} ${DEBS} PARENT_SCOPE) # return value
+  list(APPEND DEBS ${${NAME}_DEB_DEPENDS})
+  if(DEBS)
+    list(REMOVE_DUPLICATES DEBS)
+    list(SORT DEBS)
+    set(${NAME}_DEBS ${DEBS} PARENT_SCOPE) # return value
+  endif()
 endfunction()
 
 # write in-source FindPackages.cmake, .travis.yml
