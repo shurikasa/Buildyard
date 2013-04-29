@@ -129,7 +129,7 @@ function(USE_EXTERNAL_DEPS name)
     " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
     " - cd Buildyard\n"
     " - git clone --depth 10 https://github.com/Eyescale/config.git config.eyescale\n"
-    " - make ${name}-test ARGS=-V\n")
+    " - make -j8 ${name}-test ARGS=-V\n")
 
   file(WRITE ${_scriptdir}/writeDeps.cmake
     "list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)\n"
