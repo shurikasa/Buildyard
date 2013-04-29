@@ -128,7 +128,7 @@ function(USE_EXTERNAL_DEPS name)
     "script:\n"
     " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
     " - cd Buildyard\n"
-    " - git clone --depth 10 https://github.com/Eyescale/config.git config.eyescale\n"
+    " - git clone --depth 10 ${${BY_CURRENT_CONFIGGROUP}_CONFIGURL} config.${BY_CURRENT_CONFIGGROUP}\n"
     " - make -j8 ${name}-test ARGS=-V\n")
 
   file(WRITE ${_scriptdir}/writeDeps.cmake
