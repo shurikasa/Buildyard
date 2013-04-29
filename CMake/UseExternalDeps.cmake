@@ -80,7 +80,9 @@ function(USE_EXTERNAL_DEPS name)
           "if(${_dep}_name)\n"
           "  list(APPEND FIND_PACKAGES_DEFINES ${DEFDEP})\n"
           "  link_directories(\${\${${_dep}_name}_LIBRARY_DIRS})\n"
-          "  include_directories(${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS})\n"
+          "  if(NOT \"${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS}\" MATCHES \"-NOTFOUND\")\n"
+          "    include_directories(${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS})\n"
+          "  endif()\n"
           "endif()\n\n"
           )
       endif()
