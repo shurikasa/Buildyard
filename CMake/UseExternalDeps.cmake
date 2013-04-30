@@ -80,7 +80,9 @@ function(USE_EXTERNAL_DEPS name)
           "if(${_dep}_name)\n"
           "  list(APPEND FIND_PACKAGES_DEFINES ${DEFDEP})\n"
           "  link_directories(\${\${${_dep}_name}_LIBRARY_DIRS})\n"
-          "  include_directories(${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS})\n"
+          "  if(NOT \"${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS}\" MATCHES \"-NOTFOUND\")\n"
+          "    include_directories(${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS})\n"
+          "  endif()\n"
           "endif()\n\n"
           )
       endif()
@@ -131,8 +133,8 @@ function(USE_EXTERNAL_DEPS name)
     "script:\n"
     " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
     " - cd Buildyard\n"
-    " - git clone --depth 10 https://github.com/Eyescale/config.git config.eyescale\n"
-    " - make ${name}-test\n")
+    " - git clone --depth 10 ${${BY_CURRENT_CONFIGGROUP}_CONFIGURL} config.${BY_CURRENT_CONFIGGROUP}\n"
+    " - make -j8 ${name}-test ARGS=-V\n")
 
   file(WRITE ${_scriptdir}/writeDeps.cmake
     "list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)\n"

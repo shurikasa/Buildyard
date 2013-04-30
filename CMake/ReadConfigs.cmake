@@ -192,6 +192,18 @@ foreach(_dir ${_dirs})
 
           string(TOUPPER ${_config} _CONFIG)
           set(${_CONFIG}_CONFIGFILE "${_configfile}")
+
+          # get config group & URL for travis
+          get_filename_component(BY_CURRENT_CONFIGGROUP "${_dir}" EXT) # .group
+          if(BY_CURRENT_CONFIGGROUP)
+            string(REPLACE "." "" BY_CURRENT_CONFIGGROUP ${BY_CURRENT_CONFIGGROUP})
+            if(NOT ${BY_CURRENT_CONFIGGROUP}_CONFIGURL)
+              execute_process(COMMAND ${GIT_EXECUTABLE} config --get remote.origin.url
+                WORKING_DIRECTORY ${_dir} OUTPUT_VARIABLE ${BY_CURRENT_CONFIGGROUP}_CONFIGURL)
+              string(REGEX REPLACE "(\r?\n)+$" "" ${BY_CURRENT_CONFIGGROUP}_CONFIGURL "${${BY_CURRENT_CONFIGGROUP}_CONFIGURL}")
+            endif()
+          endif()
+
           use_external(${_config})
         endif()
       endif()
