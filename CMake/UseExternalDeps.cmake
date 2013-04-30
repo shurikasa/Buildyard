@@ -141,8 +141,14 @@ function(USE_EXTERNAL_DEPS name)
 
   setup_scm(${name})
   ExternalProject_Add_Step(${name} rmFindPackages
-    COMMENT "Resetting generated files"
-    COMMAND ${SCM_RESET} CMake/FindPackages.cmake .travis.yml || ${SCM_STATUS}
+    COMMENT "Resetting FindPackages"
+    COMMAND ${SCM_RESET} CMake/FindPackages.cmake || ${CMAKE_COMMAND} -E remove CMake/FindPackages.cmake
+    WORKING_DIRECTORY "${${NAME}_SOURCE}"
+    DEPENDEES mkdir DEPENDERS download ALWAYS 1
+    )
+  ExternalProject_Add_Step(${name} rmTravis
+    COMMENT "Resetting travis.yml"
+    COMMAND ${SCM_RESET} .travis.yml || ${CMAKE_COMMAND} -E remove .travis.yml
     WORKING_DIRECTORY "${${NAME}_SOURCE}"
     DEPENDEES mkdir DEPENDERS download ALWAYS 1
     )
