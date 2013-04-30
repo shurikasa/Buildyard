@@ -94,6 +94,13 @@ function(USE_EXTERNAL_DEPS name)
     file(APPEND ${_ciIn} "${_dep} ")
   endforeach()
 
+  # setup for CPACK_DEBIAN_BUILD_DEPENDS
+  if(${NAME}_DEBS)
+    file(APPEND ${_fpIn} "\n"
+      "set(${NAME}_BUILD_DEBS ${${NAME}_DEBS})\n"
+    )
+  endif()
+
   file(APPEND ${_fpIn} "\n"
     "set(${NAME}_DEPENDS ${_deps})\n\n"
     "# Write defines.h and options.cmake\n"
