@@ -133,6 +133,9 @@ function(USE_EXTERNAL_DEPS name)
     "update_file(\${DEFINES_FILE_IN} \${DEFINES_FILE})\n"
     )
   file(APPEND ${_ciIn} "\n"
+    "notifications:\n"
+    "  email:\n"
+    "    on_success: never\n"
     "language: cpp\n"
     "script:\n"
     " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
