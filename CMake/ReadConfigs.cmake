@@ -219,7 +219,6 @@ file(WRITE .travis.yml
   "    on_success: never\n"
   "language: cpp\n"
   "compiler: clang\n"
-  "script: env TRAVIS=1 make tests\n"
   "before_install:\n"
   " - sudo apt-get update -qq\n"
   " - sudo apt-get install -qq ")
@@ -231,6 +230,12 @@ if(DEBS)
     file(APPEND .travis.yml "${_dep} ")
   endforeach()
 endif()
+
+file(APPEND .travis.yml "script:\n")
+if(BUILDYARD_TRAVIS_CONFIG)
+  file(APPEND .travis.yml " - git clone --depth 1 ${BUILDYARD_TRAVIS_CONFIG}\n")
+endif()
+file(APPEND .travis.yml " - env TRAVIS=1 make tests\n")
 
 # Output configured projects:
 message("")
