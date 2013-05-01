@@ -157,7 +157,7 @@ function(USE_EXTERNAL_DEPS name)
     COMMENT "Resetting travis.yml"
     COMMAND ${SCM_RESET} .travis.yml || ${CMAKE_COMMAND} -E remove .travis.yml
     WORKING_DIRECTORY "${${NAME}_SOURCE}"
-    DEPENDEES mkdir DEPENDERS download ALWAYS 1
+    DEPENDEES rmFindPackages DEPENDERS download ALWAYS 1
     )
 
   ExternalProject_Add_Step(${name} FindPackages
