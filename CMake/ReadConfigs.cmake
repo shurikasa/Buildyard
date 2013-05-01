@@ -225,11 +225,13 @@ file(WRITE .travis.yml
   " - sudo apt-get update -qq\n"
   " - sudo apt-get install -qq ")
 
-list(REMOVE_DUPLICATES DEBS)
-list(SORT DEBS)
-foreach(_dep ${DEBS})
-  file(APPEND .travis.yml "${_dep} ")
-endforeach()
+if(DEBS)
+  list(REMOVE_DUPLICATES DEBS)
+  list(SORT DEBS)
+  foreach(_dep ${DEBS})
+    file(APPEND .travis.yml "${_dep} ")
+  endforeach()
+endif()
 
 # Output configured projects:
 message("")
