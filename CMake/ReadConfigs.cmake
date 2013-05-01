@@ -124,7 +124,7 @@ if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config.local)
   endforeach()
 endif()
 
-set(_configdone)
+set(_configs)
 if(BUILDYARD_REV)
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
@@ -158,6 +158,11 @@ foreach(_dir ${_dirs})
     if(_group STREQUAL _dirName)
       set(_group)
     else()
+      execute_process(COMMAND ${GIT_EXECUTABLE} config --get remote.origin.url
+        WORKING_DIRECTORY ${_dir} OUTPUT_VARIABLE ${_group}_CONFIGURL)
+      string(REGEX REPLACE "(\r?\n)+$" "" ${_group}_CONFIGURL
+        "${${_group}_CONFIGURL}")
+
       string(TOUPPER ${_group} _GROUP)
       if(NOT ${_GROUP}_DOC_PROJECT AND ${_GROUP}_REPO_URL)
         set(${_GROUP}_DOC_PROJECT "${_group}") # automagic doc project
@@ -185,33 +190,26 @@ foreach(_dir ${_dirs})
 
       if(NOT _config STREQUAL "Buildyard")
         set(_configfound)
-        list(FIND _configdone ${_config} _configfound)
+        list(FIND _configs ${_config} _configfound)
         if(_configfound EQUAL -1)
-          list(APPEND _configdone ${_config})
+          list(APPEND _configs ${_config})
           create_dependency_graph(${_dir} ${_dest} "${_group}" ${_config})
 
           string(TOUPPER ${_config} _CONFIG)
           set(${_CONFIG}_CONFIGFILE "${_configfile}")
-
-          # get config group & URL for travis
-          get_filename_component(BY_CURRENT_CONFIGGROUP "${_dir}" EXT) # .group
-          if(BY_CURRENT_CONFIGGROUP)
-            string(REPLACE "." "" BY_CURRENT_CONFIGGROUP ${BY_CURRENT_CONFIGGROUP})
-            if(NOT ${BY_CURRENT_CONFIGGROUP}_CONFIGURL)
-              execute_process(COMMAND ${GIT_EXECUTABLE} config --get remote.origin.url
-                WORKING_DIRECTORY ${_dir} OUTPUT_VARIABLE ${BY_CURRENT_CONFIGGROUP}_CONFIGURL)
-              string(REGEX REPLACE "(\r?\n)+$" "" ${BY_CURRENT_CONFIGGROUP}_CONFIGURL "${${BY_CURRENT_CONFIGGROUP}_CONFIGURL}")
-            endif()
-          endif()
-
-          use_external(${_config})
-          use_external_gather_debs(${_CONFIG})
-          list(APPEND DEBS ${${_CONFIG}_DEBS})
+          set(${_CONFIG}_GROUP ${_group})
         endif()
       endif()
     endforeach()
     create_dependency_graph_end(${_dir} ${_dest} "${_group}")
   endif()
+endforeach()
+
+foreach(_config ${_configs})
+  string(TOUPPER ${_config} _CONFIG)
+  use_external(${_config})
+  use_external_gather_debs(${_CONFIG})
+  list(APPEND DEBS ${${_CONFIG}_DEBS})
 endforeach()
 
 file(WRITE .travis.yml
@@ -220,7 +218,8 @@ file(WRITE .travis.yml
   "  email:\n"
   "    on_success: never\n"
   "language: cpp\n"
-  "script: make -j8 tests\n"
+  "compiler: clang\n"
+  "script: env TRAVIS=1 make tests\n"
   "before_install:\n"
   " - sudo apt-get update -qq\n"
   " - sudo apt-get install -qq ")
