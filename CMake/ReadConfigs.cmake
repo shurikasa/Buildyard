@@ -231,7 +231,7 @@ if(DEBS)
   endforeach()
 endif()
 
-file(APPEND .travis.yml "script:\n")
+file(APPEND .travis.yml "\nscript:\n")
 if(BUILDYARD_TRAVIS_CONFIG)
   file(APPEND .travis.yml " - git clone --depth 1 ${BUILDYARD_TRAVIS_CONFIG}\n")
 endif()
