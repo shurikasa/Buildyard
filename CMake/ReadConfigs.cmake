@@ -24,7 +24,7 @@ endif()
 macro(READ_CONFIG_DIR DIR)
   get_property(READ_CONFIG_DIR_DONE GLOBAL PROPERTY READ_CONFIG_DIR_${DIR})
   if(NOT READ_CONFIG_DIR_DONE)
-    message(STATUS "Reading ${DIR}")
+    message(STATUS "Setting up ${DIR}")
     set_property(GLOBAL PROPERTY READ_CONFIG_DIR_${DIR} ON)
 
     set(READ_CONFIG_DIR_DEPENDS)
