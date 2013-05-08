@@ -149,7 +149,7 @@ endif()
 file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
 foreach(_dir ${_dirs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
-    message(STATUS "Configuring ${_dir}")
+    message(STATUS "Reading ${_dir}")
     get_filename_component(_dirName ${_dir} NAME)
 
     set(_dest "${_dir}")
