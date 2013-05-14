@@ -104,8 +104,8 @@ function(USE_EXTERNAL_DEPS name)
   endforeach()
 
   file(APPEND ${_fpIn} "\n"
-    "if(EXISTS \${CMAKE_SOURCE_DIR}/FindPackagesPost.cmake)\n"
-    "  include(\${CMAKE_SOURCE_DIR}/FindPackagesPost.cmake)\n"
+    "if(EXISTS \${CMAKE_SOURCE_DIR}/CMake/FindPackagesPost.cmake)\n"
+    "  include(\${CMAKE_SOURCE_DIR}/CMake/FindPackagesPost.cmake)\n"
     "endif()\n"
     )
 
