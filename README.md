@@ -31,7 +31,8 @@ build a project considering all dependencies.
 ### Others
 
 Execute 'make' or 'make [Project]', which invokes cmake and builds debug
-versions of all or the specified project.
+versions of all or the specified project. On Ubuntu, 'make apt-get'
+installs all known package dependencies.
 
 For development, cd into src/[Project] and work there as usual. The
 default make target will build the (pre-configured) project without

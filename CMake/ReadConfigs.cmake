@@ -216,6 +216,10 @@ endforeach()
 if(DEBS)
   list(REMOVE_DUPLICATES DEBS)
   list(SORT DEBS)
+
+  add_custom_target(apt-get
+    COMMAND sudo apt-get install ${DEBS}
+    COMMENT "Running 'sudo apt-get install' for all dependencies:")
 endif()
 
 # generate Travis configs
