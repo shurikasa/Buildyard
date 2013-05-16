@@ -164,7 +164,7 @@ foreach(_dir ${_dirs})
         "${${_group}_CONFIGURL}")
 
       string(TOUPPER ${_group} _GROUP)
-      if(NOT ${_GROUP}_DOC_PROJECT AND ${_GROUP}_REPO_URL)
+      if(NOT ${_GROUP}_DOC_PROJECT)
         set(${_GROUP}_DOC_PROJECT "${_group}") # automagic doc project
       endif()
       if(${_GROUP}_DOC_PROJECT) # set in config.group/Buildyard.cmake

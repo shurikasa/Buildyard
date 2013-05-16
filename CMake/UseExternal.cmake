@@ -15,8 +15,9 @@ set(Boost_NO_BOOST_CMAKE ON) #fix Boost find for CMake > 2.8.7
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
 
-set(USE_EXTERNAL_SUBTARGETS update build buildonly configure test testonly
-  install package download deps Makefile stat clean reset)
+set(USE_EXTERNAL_SUBTARGETS update build buildall buildonly configure test
+  testonly install package download deps Makefile stat clean reset resetall
+  projects bootstrap module)
 foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   add_custom_target(${subtarget}s)
   set_target_properties(${subtarget}s PROPERTIES FOLDER "00_Meta")
@@ -196,6 +197,7 @@ function(USE_EXTERNAL name)
 
   # pull in dependent projects first
   add_custom_target(${name}-projects)
+
   set(DEPENDS)
   set(MISSING)
   set(DEPMODE)
