@@ -164,13 +164,12 @@ foreach(_dir ${_dirs})
         "${${_group}_CONFIGURL}")
 
       string(TOUPPER ${_group} _GROUP)
-      if(NOT ${_GROUP}_DOC_PROJECT)
+      if(NOT ${_GROUP}_DOC_PROJECT AND ${_GROUP}_REPO_URL)
         set(${_GROUP}_DOC_PROJECT "${_group}") # automagic doc project
       endif()
       if(${_GROUP}_DOC_PROJECT) # set in config.group/Buildyard.cmake
         set(_dest "${CMAKE_SOURCE_DIR}/src/${${_GROUP}_DOC_PROJECT}/images")
       endif()
-      set(_group ${${_GROUP}_DOC_PROJECT})
     endif()
 
     if(NOT BUILDYARD_REV AND _dir MATCHES "config.")
@@ -193,7 +192,8 @@ foreach(_dir ${_dirs})
         list(FIND _configs ${_config} _configfound)
         if(_configfound EQUAL -1)
           list(APPEND _configs ${_config})
-          create_dependency_graph(${_dir} ${_dest} "${_group}" ${_config})
+          create_dependency_graph(${_dir} ${_dest} "${${_GROUP}_DOC_PROJECT}"
+            ${_config})
 
           string(TOUPPER ${_config} _CONFIG)
           set(${_CONFIG}_CONFIGFILE "${_configfile}")
@@ -201,7 +201,7 @@ foreach(_dir ${_dirs})
         endif()
       endif()
     endforeach()
-    create_dependency_graph_end(${_dir} ${_dest} "${_group}")
+    create_dependency_graph_end(${_dir} ${_dest} "${${_GROUP}_DOC_PROJECT}")
   endif()
 endforeach()
 
