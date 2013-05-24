@@ -206,6 +206,7 @@ foreach(_dir ${_dirs})
 endforeach()
 
 # configure projects
+list(SORT _configs)
 foreach(_config ${_configs})
   string(TOUPPER ${_config} _CONFIG)
   use_external(${_config})
