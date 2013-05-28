@@ -6,6 +6,4 @@ set(LIBJPEGTURBO_REPO_URL svn://svn.code.sf.net/p/libjpeg-turbo/code/tags/1.2.1)
 set(LIBJPEGTURBO_REPO_TYPE svn)
 set(LIBJPEGTURBO_SOURCE "${CMAKE_SOURCE_DIR}/src/LibJpegTurbo")
 set(LIBJPEGTURBO_EXTRA
-  PATCH_COMMAND cd ${LIBJPEGTURBO_SOURCE} && autoreconf -i
-  CONFIGURE_COMMAND ${LIBJPEGTURBO_SOURCE}/configure "--prefix=${CMAKE_CURRENT_BINARY_DIR}/install"
-)
+ CONFIGURE_COMMAND ${CMAKE_COMMAND} -P libjpegturbo_configure_cmd.cmake)
