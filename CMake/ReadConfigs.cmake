@@ -59,13 +59,23 @@ macro(READ_CONFIG_DIR DIR)
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" clone "${READ_CONFIG_DIR_DEPENDS_REPO}"
             "${READ_CONFIG_DIR_DEPENDS_DIR}"
+          RESULT_VARIABLE nok ERROR_VARIABLE error
           WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+        if(nok)
+          message(FATAL_ERROR
+            "${READ_CONFIG_DIR_DEPENDS_DIR} git clone failed: ${error}\n")
+        endif()
       endif()
       execute_process(
+        COMMAND "${GIT_EXECUTABLE}" pull
         COMMAND "${GIT_EXECUTABLE}" checkout -q "${READ_CONFIG_DIR_DEPENDS_TAG}"
+        RESULT_VARIABLE nok ERROR_VARIABLE error
         WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
         )
-
+      if(nok)
+        message(FATAL_ERROR
+          "${READ_CONFIG_DIR_DEPENDS_DIR} git update failed: ${error}\n")
+      endif()
       read_config_dir(${READ_CONFIG_DIR_DEPENDS_DIR})
     endwhile()
 
