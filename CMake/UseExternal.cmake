@@ -397,7 +397,8 @@ function(USE_EXTERNAL name)
        message(FATAL_ERROR \"${name} not configured. Please build '${name}' or 'build'.\")\n
      endif()\n"
   )
-  add_custom_target(${name}-bootstrap COMMAND ${CMAKE_COMMAND} -P ${BOOTSTRAPFILE})
+  add_custom_target(${name}-bootstrap
+    COMMAND ${CMAKE_COMMAND} -P ${BOOTSTRAPFILE})
   add_dependencies(${name}-buildall ${name}-bootstrap)
   set_target_properties(${name}-bootstrap PROPERTIES EXCLUDE_FROM_ALL ON)
 
