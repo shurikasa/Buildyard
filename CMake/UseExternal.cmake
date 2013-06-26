@@ -11,6 +11,7 @@ include(UseExternalDeps)
 include(UseExternalAutoconf)
 include(LSBInfo)
 
+find_package(Boost QUIET)
 set(Boost_NO_BOOST_CMAKE ON) #fix Boost find for CMake > 2.8.7
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
@@ -290,6 +291,9 @@ function(USE_EXTERNAL name)
            -DMODULE_MODULEFILES:INTERNAL=${MODULE_MODULEFILES}
            -DMODULE_SW_CLASS:INTERNAL=${MODULE_SW_CLASS}
             ${${NAME}_ARGS} ${${NAME}_CMAKE_ARGS})
+  if(NOT Boost_FOUND)
+    list(APPEND ARGS -DBoost_NO_SYSTEM_PATHS=ON)
+  endif()
 
   ExternalProject_Add(${name}
     LIST_SEPARATOR !
