@@ -11,9 +11,6 @@ include(UseExternalDeps)
 include(UseExternalAutoconf)
 include(LSBInfo)
 
-find_package(Boost QUIET)
-set(Boost_NO_BOOST_CMAKE ON) #fix Boost find for CMake > 2.8.7
-find_package(Boost QUIET)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
 

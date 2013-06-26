@@ -215,6 +215,12 @@ foreach(_dir ${_dirs})
   endif()
 endforeach()
 
+# resolve to set Boost_NO_SYSTEM_PATHS later in use_external
+if(NOT BOOST_FORCE_BUILD)
+  set(Boost_NO_BOOST_CMAKE ON) #fix Boost find for CMake > 2.8.7
+  find_package(Boost QUIET)
+endif()
+
 # configure projects
 list(SORT _configs)
 foreach(_config ${_configs})
