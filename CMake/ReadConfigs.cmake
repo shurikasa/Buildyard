@@ -66,15 +66,17 @@ macro(READ_CONFIG_DIR DIR)
             "${READ_CONFIG_DIR_DEPENDS_DIR} git clone failed: ${error}\n")
         endif()
       endif()
-      execute_process(
-        COMMAND "${GIT_EXECUTABLE}" pull
-        COMMAND "${GIT_EXECUTABLE}" checkout -q "${READ_CONFIG_DIR_DEPENDS_TAG}"
-        RESULT_VARIABLE nok ERROR_VARIABLE error
-        WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
-        )
-      if(nok)
-        message(FATAL_ERROR
-          "${READ_CONFIG_DIR_DEPENDS_DIR} git update failed: ${error}\n")
+      if(IS_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}/.git")
+        execute_process(
+          COMMAND "${GIT_EXECUTABLE}" pull
+          COMMAND "${GIT_EXECUTABLE}" checkout -q "${READ_CONFIG_DIR_DEPENDS_TAG}"
+          RESULT_VARIABLE nok ERROR_VARIABLE error
+          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
+          )
+        if(nok)
+          message(FATAL_ERROR
+            "${READ_CONFIG_DIR_DEPENDS_DIR} git update failed: ${error}\n")
+        endif()
       endif()
       read_config_dir(${READ_CONFIG_DIR_DEPENDS_DIR})
     endwhile()
@@ -135,25 +137,28 @@ if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config.local)
 endif()
 
 set(_configs)
-if(BUILDYARD_REV)
-  execute_process(
-    COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-  add_custom_target(update)
-else()
-  add_custom_target(update
-    COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
-    COMMENT "Updating Buildyard"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-
-  if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local")
-    add_custom_target(config.local-update
-      COMMAND ${GIT_EXECUTABLE} pull
-      COMMENT "Updating config.local"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local"
-      )
-    add_dependencies(update config.local-update)
+if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/.git")
+  if(BUILDYARD_REV)
+    execute_process(
+      COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+    add_custom_target(update)
+  else()
+    add_custom_target(update
+      COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
+      COMMENT "Updating Buildyard"
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
   endif()
+else()
+  add_custom_target(update)
+endif()
+if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local/.git")
+  add_custom_target(config.local-update
+    COMMAND ${GIT_EXECUTABLE} pull
+    COMMENT "Updating config.local"
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local"
+    )
+  add_dependencies(update config.local-update)
 endif()
 
 file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
