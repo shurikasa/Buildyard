@@ -7,7 +7,7 @@ project(Buildyard)
 set(VERSION_MAJOR "2013")
 set(VERSION_MINOR "6")
 set(VERSION_PATCH "0")
-set(RELEASE_VERSION 0) # OFF or ABI version
+set(RELEASE_VERSION 1) # OFF or ABI version
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
 set(GITTARGETS_RELEASE_BRANCH current)
