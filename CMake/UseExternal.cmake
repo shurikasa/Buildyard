@@ -165,12 +165,12 @@ function(USE_EXTERNAL name)
     set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
   endif()
   if(${name}_FOUND)
-    if(NOT "${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}" STREQUAL "")
-      message(STATUS "${USE_EXTERNAL_INDENT}${name}: ${${NAME}_VERSION} "
-        "installed in ${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}")
-    else()
-      message(STATUS "${USE_EXTERNAL_INDENT}${name}: found")
-    endif()
+#    if(NOT "${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}" STREQUAL "")
+#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: ${${NAME}_VERSION} "
+#        "installed in ${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}")
+#    else()
+#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: found")
+#    endif()
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
     set(USING ${USING} ${name} PARENT_SCOPE)
@@ -185,16 +185,14 @@ function(USE_EXTERNAL name)
   unset(${NAME}_LIBRARY_DIRS CACHE)
 
   if("${${NAME}_REPO_URL}" STREQUAL "")
-    message(STATUS
-      "${USE_EXTERNAL_INDENT}${name}: No source repo, update ${name}.cmake?")
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
     set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
     return()
   endif()
 
-  message(STATUS   # print first for nicer output
-    "${USE_EXTERNAL_INDENT}${name}: use ${${NAME}_REPO_URL}:${${NAME}_REPO_TAG}"
-    )
+#  message(STATUS   # print first for nicer output
+#    "${USE_EXTERNAL_INDENT}${name}: use ${${NAME}_REPO_URL}:${${NAME}_REPO_TAG}#"
+#    )
 
   # pull in dependent projects first
   add_custom_target(${name}-projects)
@@ -229,7 +227,7 @@ function(USE_EXTERNAL name)
     endif()
   endforeach()
   if(MISSING)
-    message(STATUS "${USE_EXTERNAL_INDENT}${name}: SKIP, missing${MISSING}")
+    message(STATUS "Skip ${name}: missing${MISSING}")
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
     set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
     return()
