@@ -145,6 +145,9 @@ function(USE_EXTERNAL_DEPS name)
     "  \"\\n#endif\\n\")\n\n"
     "include(UpdateFile)\n"
     "update_file(\${DEFINES_FILE_IN} \${DEFINES_FILE})\n"
+    "if(Boost_FOUND) # another WAR for broken boost stuff...\n"
+    "  set(Boost_VERSION ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION})\n"
+    "endif()\n"
     )
 
   file(WRITE ${_scriptdir}/writeDeps.cmake
