@@ -148,6 +148,10 @@ function(USE_EXTERNAL_DEPS name)
     "if(Boost_FOUND) # another WAR for broken boost stuff...\n"
     "  set(Boost_VERSION \${Boost_MAJOR_VERSION}.\${Boost_MINOR_VERSION}.\${Boost_SUBMINOR_VERSION})\n"
     "endif()\n"
+    "if(CUDA_FOUND)\n"
+    "  string(REPLACE \"-std=c++11\" \"\" CUDA_HOST_FLAGS \"\${CUDA_HOST_FLAGS}\")\n"
+    "  string(REPLACE \"-std=c++0x\" \"\" CUDA_HOST_FLAGS \"\${CUDA_HOST_FLAGS}\")\n"
+    "endif()\n"
     )
 
   file(WRITE ${_scriptdir}/writeDeps.cmake
