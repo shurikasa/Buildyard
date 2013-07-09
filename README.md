@@ -19,8 +19,8 @@ dotted bubbles, and optional dependencies linked using dotted arrows:
 
 Use cmake to build a Visual Studio Solution. Build this solution at
 least once to download and install all dependencies. Do not use
-'Build-]Build Solution', but build the project 'ALL_BUILD' or
-'00_Main-]AllProjects' instead. The solution contains sub-targets without
+'Build - Build Solution', but build the project 'ALL_BUILD' or
+'00_Main - AllProjects' instead. The solution contains sub-targets without
 proper dependencies, which will cause build failures.
 
 For development, open [build]/[Project]/[Project].sln and work there as
@@ -31,7 +31,8 @@ build a project considering all dependencies.
 ### Others
 
 Execute 'make' or 'make [Project]', which invokes cmake and builds debug
-versions of all or the specified project.
+versions of all or the specified project. On Ubuntu, 'make apt-get'
+installs all known package dependencies.
 
 For development, cd into src/[Project] and work there as usual. The
 default make target will build the (pre-configured) project without
@@ -132,6 +133,10 @@ testing downstream projects after API changes.
 
 Builds all dependencies of the given project.
 
+### NAME-doxygen
+
+Builds doxygen documentation of the given project.
+
 ### NAME-reset
 
 Cleans all working changes in the project's source directory.
@@ -160,3 +165,8 @@ file:///Users/eilemann/Software/Buildyard/Build/install/ports/
 [...]
 sudo port install Equalizer +universal
 ```
+
+## Known issues
+
+* Boost build not automatically triggered on VS2010
+([#17](https://github.com/Eyescale/Buildyard/issues/17))

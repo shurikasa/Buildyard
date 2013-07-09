@@ -5,10 +5,19 @@ add_custom_target(pngs)
 
 function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
   string(TOUPPER ${name} NAME)
+  if(${NAME}_PACKAGE_VERSION)
+    set(label "${name}\\n${${NAME}_PACKAGE_VERSION}")
+  else()
+    set(label "${name}")
+  endif()
   if(${NAME}_OPTIONAL OR NOT ${NAME}_PACKAGE_VERSION)
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
-      "${name} [style=dashed]\n")
-    file(APPEND ${FILE} "${name} [style=dashed]\n")
+      "${name} [style=dashed, label=\"${label}\"]\n")
+    file(APPEND ${FILE} "${name} [style=dashed, label=\"${label}\"]\n")
+  else()
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
+      "${name} [style=solid, label=\"${label}\"]\n")
+    file(APPEND ${FILE} "${name} [style=solid, label=\"${label}\"]\n")
   endif()
 
   set(DEPMODE dashed)

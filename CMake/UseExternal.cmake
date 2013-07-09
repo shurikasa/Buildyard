@@ -11,12 +11,12 @@ include(UseExternalDeps)
 include(UseExternalAutoconf)
 include(LSBInfo)
 
-set(Boost_NO_BOOST_CMAKE ON) #fix Boost find for CMake > 2.8.7
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
 
-set(USE_EXTERNAL_SUBTARGETS update build buildonly configure test testonly
-  install package download deps Makefile stat clean reset)
+set(USE_EXTERNAL_SUBTARGETS update build buildall buildonly configure test
+  testonly install package download deps Makefile stat clean reset resetall
+  projects bootstrap module)
 foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   add_custom_target(${subtarget}s)
   set_target_properties(${subtarget}s PROPERTIES FOLDER "00_Meta")
@@ -53,32 +53,6 @@ function(USE_EXTERNAL_CHANGE_ORIGIN name ORIGIN_URL USER_URL ORIGIN_RENAME)
     )
   endif()
 endfunction()
-
-
-function(USE_EXTERNAL_GATHER_ARGS name)
-  # sets ${NAME}_ARGS on return, to be passed to CMake
-  string(TOUPPER ${name} NAME)
-
-  set(ARGS)
-  set(DEPENDS)
-  set(${UPPER_NAME}_ARGS)
-
-  # recurse to get dependency roots
-  foreach(proj ${${NAME}_DEPENDS})
-    use_external_gather_args(${proj})
-    string(TOUPPER ${proj} PROJ)
-    set(ARGS ${ARGS} ${${PROJ}_ARGS})
-  endforeach()
-
-  get_target_property(_check ${name} _EP_IS_EXTERNAL_PROJECT)
-  if(NOT _check EQUAL 1) # installed package
-    set(${NAME}_ARGS ${ARGS} PARENT_SCOPE) # return value
-    return()
-  endif()
-
-  set(${NAME}_ARGS ${ARGS} PARENT_SCOPE) # return value
-endfunction()
-
 
 function(USE_EXTERNAL_BUILDONLY name)
   ExternalProject_Get_Property(${name} binary_dir)
@@ -141,6 +115,8 @@ function(USE_EXTERNAL name)
   get_property(_check GLOBAL PROPERTY USE_EXTERNAL_${name})
   if(_check) # tested, be quiet and propagate upwards
     set(BUILDING ${BUILDING} PARENT_SCOPE)
+    set(SKIPPING ${SKIPPING} PARENT_SCOPE)
+    set(USING ${USING} PARENT_SCOPE)
     return()
   endif()
 
@@ -189,14 +165,15 @@ function(USE_EXTERNAL name)
     set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
   endif()
   if(${name}_FOUND)
-    if(NOT "${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}" STREQUAL "")
-      message(STATUS "${USE_EXTERNAL_INDENT}${name}: ${${NAME}_VERSION} "
-        "installed in ${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}")
-    else()
-      message(STATUS "${USE_EXTERNAL_INDENT}${name}: found")
-    endif()
+#    if(NOT "${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}" STREQUAL "")
+#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: ${${NAME}_VERSION} "
+#        "installed in ${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}")
+#    else()
+#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: found")
+#    endif()
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
+    set(USING ${USING} ${name} PARENT_SCOPE)
     return()
   endif()
 
@@ -208,18 +185,18 @@ function(USE_EXTERNAL name)
   unset(${NAME}_LIBRARY_DIRS CACHE)
 
   if("${${NAME}_REPO_URL}" STREQUAL "")
-    message(STATUS
-      "${USE_EXTERNAL_INDENT}${name}: No source repo, update ${name}.cmake?")
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
+    set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
     return()
   endif()
 
-  message(STATUS   # print first for nicer output
-    "${USE_EXTERNAL_INDENT}${name}: use ${${NAME}_REPO_URL}:${${NAME}_REPO_TAG}"
-    )
+#  message(STATUS   # print first for nicer output
+#    "${USE_EXTERNAL_INDENT}${name}: use ${${NAME}_REPO_URL}:${${NAME}_REPO_TAG}#"
+#    )
 
   # pull in dependent projects first
   add_custom_target(${name}-projects)
+
   set(DEPENDS)
   set(MISSING)
   set(DEPMODE)
@@ -250,8 +227,9 @@ function(USE_EXTERNAL name)
     endif()
   endforeach()
   if(MISSING)
-    message(STATUS "${USE_EXTERNAL_INDENT}${name}: SKIP, missing${MISSING}")
+    message(STATUS "Skip ${name}: missing${MISSING}")
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
+    set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
     return()
   endif()
 
@@ -301,12 +279,19 @@ function(USE_EXTERNAL name)
 
   set(INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install")
   list(APPEND CMAKE_PREFIX_PATH ${INSTALL_PATH})
-  use_external_gather_args(${name})
   set(ARGS -DBUILDYARD:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
            -DCMAKE_PREFIX_PATH=${INSTALL_PATH}
            -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
-           -DBoost_NO_BOOST_CMAKE=ON ${${NAME}_ARGS} ${${NAME}_CMAKE_ARGS})
+           -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
+           -DBoost_NO_BOOST_CMAKE=ON
+           -DMODULE_SW_BASEDIR:INTERNAL=${MODULE_SW_BASEDIR}
+           -DMODULE_MODULEFILES:INTERNAL=${MODULE_MODULEFILES}
+           -DMODULE_SW_CLASS:INTERNAL=${MODULE_SW_CLASS}
+            ${${NAME}_ARGS} ${${NAME}_CMAKE_ARGS})
+  if(NOT Boost_FOUND)
+    list(APPEND ARGS -DBoost_NO_SYSTEM_PATHS=ON)
+  endif()
 
   ExternalProject_Add(${name}
     LIST_SEPARATOR !
@@ -339,7 +324,7 @@ function(USE_EXTERNAL name)
     unset(${REPO_ORIGIN_NAME} CACHE)
   endif()
 
-  # add optional targets: package, doxygen, github
+  # add optional targets: package, stat, reset
   get_property(cmd_set TARGET ${name} PROPERTY _EP_BUILD_COMMAND SET)
   if(cmd_set)
     get_property(cmd TARGET ${name} PROPERTY _EP_BUILD_COMMAND)
@@ -371,6 +356,13 @@ function(USE_EXTERNAL name)
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}"
     )
   set_target_properties(${name}-package PROPERTIES EXCLUDE_FROM_ALL ON)
+
+  add_custom_target(${name}-module
+    COMMAND ${cmd} module
+    COMMENT "Building module for ${name}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}"
+    )
+  set_target_properties(${name}-module PROPERTIES EXCLUDE_FROM_ALL ON)
 
   setup_scm(${name})
 
@@ -408,7 +400,8 @@ function(USE_EXTERNAL name)
        message(FATAL_ERROR \"${name} not configured. Please build '${name}' or 'build'.\")\n
      endif()\n"
   )
-  add_custom_target(${name}-bootstrap COMMAND ${CMAKE_COMMAND} -P ${BOOTSTRAPFILE})
+  add_custom_target(${name}-bootstrap
+    COMMAND ${CMAKE_COMMAND} -P ${BOOTSTRAPFILE})
   add_dependencies(${name}-buildall ${name}-bootstrap)
   set_target_properties(${name}-bootstrap PROPERTIES EXCLUDE_FROM_ALL ON)
   set_target_properties(${name}-buildall PROPERTIES FOLDER ${name})
@@ -461,4 +454,6 @@ function(USE_EXTERNAL name)
   set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
   set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
   set(BUILDING ${BUILDING} ${name} PARENT_SCOPE)
+  set(SKIPPING ${SKIPPING} PARENT_SCOPE)
+  set(USING ${USING} PARENT_SCOPE)
 endfunction()

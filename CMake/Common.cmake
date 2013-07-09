@@ -14,7 +14,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/System.cmake)
 
 enable_testing()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-list(APPEND CMAKE_PREFIX_PATH ${SystemDrive}:/cygwin/bin)
 
 if(NOT CMAKE_BUILD_TYPE)
   if(RELEASE_VERSION)
@@ -23,10 +22,8 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
   endif()
 endif(NOT CMAKE_BUILD_TYPE)
-if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNDEBUG")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNDEBUG")
-endif()
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 
 set(VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 string(TOUPPER ${CMAKE_PROJECT_NAME} UPPER_PROJECT_NAME)
@@ -60,6 +57,10 @@ set(OUTPUT_INCLUDE_DIR ${CMAKE_BINARY_DIR}/include)
 file(MAKE_DIRECTORY ${OUTPUT_INCLUDE_DIR})
 include_directories(BEFORE ${CMAKE_SOURCE_DIR} ${OUTPUT_INCLUDE_DIR})
 
+if(NOT DOC_DIR)
+  set(DOC_DIR share/${CMAKE_PROJECT_NAME}/doc)
+endif()
+
 if(MSVC)
   set(CMAKE_MODULE_INSTALL_PATH ${CMAKE_PROJECT_NAME}/CMake)
 else()
@@ -67,13 +68,10 @@ else()
 endif()
 
 # Boost settings
-if(MSVC)
-  option(Boost_USE_STATIC_LIBS "Use boost static libs" ON)
-endif()
-if(BOOST_ROOT)
-  set(Boost_NO_SYSTEM_PATHS TRUE)
-endif()
+set(Boost_NO_BOOST_CMAKE ON CACHE BOOL "Enable fix for FindBoost.cmake" )
 add_definitions(-DBOOST_ALL_NO_LIB) # Don't use 'pragma lib' on Windows
+add_definitions(-DBoost_NO_BOOST_CMAKE) # Fix for CMake problem in FindBoost
+add_definitions(-DBOOST_TEST_DYN_LINK) # generates main() for unit tests
 
 include(TestBigEndian)
 test_big_endian(BIGENDIAN)
@@ -81,40 +79,7 @@ if(BIGENDIAN)
   add_definitions(-D${UPPER_PROJECT_NAME}_BIGENDIAN)
 endif()
 
-# Compiler settings
-if(CMAKE_CXX_COMPILER_ID STREQUAL "XL")
-  set(CMAKE_COMPILER_IS_XLCXX ON)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  set(CMAKE_COMPILER_IS_INTEL ON)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_COMPILER_IS_CLANG ON)
-elseif(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_COMPILER_IS_GNUCXX_PURE ON)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANG)
-  include(${CMAKE_CURRENT_LIST_DIR}/CompilerVersion.cmake)
-  COMPILER_DUMPVERSION(GCC_COMPILER_VERSION)
-  if(GCC_COMPILER_VERSION VERSION_LESS 4.1)
-    message(ERROR "GCC 4.1 or later required, found ${GCC_COMPILER_VERSION}")
-  endif()
-  set(COMMON_GCC_FLAGS "-Wall -Wextra -Winvalid-pch -Winit-self -Wno-unknown-pragmas -Wno-unused-parameter")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_GCC_FLAGS} ")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_GCC_FLAGS} -Wnon-virtual-dtor -Wsign-promo")
-  if(GCC_COMPILER_VERSION VERSION_GREATER 4.1) # < 4.2 doesn't know -isystem
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshadow")
-  endif()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wuninitialized")
-  if(NOT WIN32 AND NOT XCODE_VERSION AND NOT RELEASE_VERSION)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-  endif()
-  if(CMAKE_COMPILER_IS_CLANG)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments")
-  endif()
-elseif(CMAKE_COMPILER_IS_INTEL)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated -Wno-unknown-pragmas")
-endif()
+include(Compiler) # compiler-specific default options and warnings
 
 if(MSVC)
   add_definitions(
@@ -137,15 +102,18 @@ if(MSVC)
       SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
   endif()
 
+  # By default, do not warn when built on machines using only VS Express
+  # http://cmake.org/gitweb?p=cmake.git;a=commit;h=fa4a3b04d0904a2e93242c0c3dd02a357d337f77
+  if(NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
+      SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
+  endif()
+
   # http://www.ogre3d.org/forums/viewtopic.php?f=2&t=60015&start=0
   if(RELEASE_VERSION)
     set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /Zm500 /EHsc /GR")
   else()
     set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /Zm500 /EHsc /GR /WX")
   endif()
-elseif(EXISTS ${CMAKE_SOURCE_DIR}/CMake/${CMAKE_PROJECT_NAME}.in.spec)
-  configure_file(${CMAKE_SOURCE_DIR}/CMake/${CMAKE_PROJECT_NAME}.in.spec
-    ${CMAKE_SOURCE_DIR}/CMake/${CMAKE_PROJECT_NAME}.spec @ONLY)
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
@@ -163,7 +131,8 @@ endif()
 set(LIBRARY_DIR lib${LIB_SUFFIX})
 
 if(APPLE)
-  list(APPEND CMAKE_PREFIX_PATH "/opt/local/") # Macports
+  list(APPEND CMAKE_PREFIX_PATH /opt/local/ /opt/local/lib) # Macports
+  set(ENV{PATH} "/opt/local/bin:$ENV{PATH}") # dito
   if(NOT CMAKE_OSX_ARCHITECTURES OR CMAKE_OSX_ARCHITECTURES STREQUAL "")
     if(_CMAKE_OSX_MACHINE MATCHES "ppc")
       set(CMAKE_OSX_ARCHITECTURES "ppc;ppc64" CACHE
@@ -195,7 +164,11 @@ macro(add_library _target)
 
   # ignore IMPORTED add_library from finders (e.g. Qt)
   cmake_parse_arguments(_arg "IMPORTED" "" "" ${ARGN})
-  if(NOT _arg_IMPORTED)
+
+  # ignore user-specified targets, e.g. language bindings
+  list(FIND IGNORE_LIB_TARGETS ${_target} _ignore_target)
+
+  if(NOT _arg_IMPORTED AND _ignore_target EQUAL -1)
     # add defines TARGET_DSO_NAME and TARGET_SHARED for dlopen() usage
     get_target_property(THIS_DEFINITIONS ${_target} COMPILE_DEFINITIONS)
     if(NOT THIS_DEFINITIONS)
