@@ -380,6 +380,7 @@ function(USE_EXTERNAL name)
     WORKING_DIRECTORY "${${NAME}_SOURCE}"
     )
   set_target_properties(${name}-stat PROPERTIES EXCLUDE_FROM_ALL ON)
+  set_target_properties(${name}-stat PROPERTIES FOLDER ${name})
 
   add_custom_target(${name}-reset
     COMMAND ${SCM_UNSTAGE}
@@ -410,12 +411,15 @@ function(USE_EXTERNAL name)
   add_custom_target(${name}-bootstrap COMMAND ${CMAKE_COMMAND} -P ${BOOTSTRAPFILE})
   add_dependencies(${name}-buildall ${name}-bootstrap)
   set_target_properties(${name}-bootstrap PROPERTIES EXCLUDE_FROM_ALL ON)
+  set_target_properties(${name}-buildall PROPERTIES FOLDER ${name})
+  set_target_properties(${name}-bootstrap PROPERTIES FOLDER ${name})
 
   foreach(_dep ${${NAME}_DEPENDS})
     get_target_property(_dep_check ${_dep} _EP_IS_EXTERNAL_PROJECT)
     if(_dep_check EQUAL 1)
       add_dependencies(${name}-resetall ${_dep}-resetall)
       add_dependencies(${name}-buildall ${_dep}-buildall)
+      set_target_properties(${name}-resetall PROPERTIES FOLDER ${name})
     endif()
   endforeach()
 
