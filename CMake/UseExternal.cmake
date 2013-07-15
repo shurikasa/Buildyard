@@ -1,10 +1,12 @@
 
 # Copyright (c) 2012-2013 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 
+find_package(Git REQUIRED)
+find_package(PkgConfig)
+
 include(SCM)
 include(ExternalProject)
 include(CMakeParseArguments)
-find_package(Git REQUIRED)
 include(UseExternalClone)
 include(UseExternalMakefile)
 include(UseExternalDeps)
@@ -163,6 +165,14 @@ function(USE_EXTERNAL name)
   endif()
   if(${NAME}_FOUND)
     set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
+  endif()
+  if(NOT ${name}_FOUND) # try pkg_config
+    if(PKGCONFIG_FOUND)
+      pkg_check_modules(${NAME} QUIET ${name})
+      if(${NAME}_FOUND)
+        set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
+      endif()
+    endif()
   endif()
   if(${name}_FOUND)
 #    if(NOT "${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}" STREQUAL "")
