@@ -88,6 +88,7 @@ function(USE_EXTERNAL_DEPS name)
           "endif()\n"
           "if(${_dep}_name)\n"
           "  list(APPEND FIND_PACKAGES_DEFINES ${DEFDEP})\n"
+          "  set(FIND_PACKAGES_FOUND \"\${FIND_PACKAGES_FOUND} ${_dep}\")\n"
           "  link_directories(\${\${${_dep}_name}_LIBRARY_DIRS})\n"
           "  if(NOT \"${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS}\" MATCHES \"-NOTFOUND\")\n"
           "    include_directories(${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS})\n"
@@ -151,6 +152,9 @@ function(USE_EXTERNAL_DEPS name)
     "if(CUDA_FOUND)\n"
     "  string(REPLACE \"-std=c++11\" \"\" CUDA_HOST_FLAGS \"\${CUDA_HOST_FLAGS}\")\n"
     "  string(REPLACE \"-std=c++0x\" \"\" CUDA_HOST_FLAGS \"\${CUDA_HOST_FLAGS}\")\n"
+    "endif()\n"
+    "if(FIND_PACKAGES_FOUND)\n"
+    "  message(STATUS \"Configured with \${CMAKE_BUILD_TYPE}\${FIND_PACKAGES_FOUND}\")\n"
     "endif()\n"
     )
 
