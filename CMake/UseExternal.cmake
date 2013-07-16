@@ -166,8 +166,8 @@ function(USE_EXTERNAL name)
   if(${NAME}_FOUND)
     set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
   endif()
-  if(NOT ${name}_FOUND) # try pkg_config
-    if(PKGCONFIG_FOUND)
+  if(NOT ${name}_FOUND) # try pkg-config
+    if(PKG_CONFIG_FOUND)
       pkg_check_modules(${NAME} QUIET ${name})
       if(${NAME}_FOUND)
         set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
