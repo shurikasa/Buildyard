@@ -28,6 +28,9 @@ usual. This solution will build the (pre-configured) project without
 considering any dependencies. Use the [build]/Buildyard.sln target to
 build a project considering all dependencies.
 
+It is highly recommended to install a precompiled boost version using
+the installers provided by BoostPro.
+
 ### Others
 
 Execute 'make' or 'make [Project]', which invokes cmake and builds debug
