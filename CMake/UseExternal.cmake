@@ -152,7 +152,6 @@ function(USE_EXTERNAL name)
   list(APPEND CMAKE_MODULE_PATH /usr/local/share/${name}/CMake)
 
   # try find_package
-  set(USE_EXTERNAL_INDENT "${USE_EXTERNAL_INDENT}  ")
   if(NOT ${NAME}_FORCE_BUILD)
     if(USE_EXTERNAL_COMPONENTS)
       string(REGEX REPLACE  " " ";" USE_EXTERNAL_COMPONENTS
@@ -175,12 +174,6 @@ function(USE_EXTERNAL name)
     endif()
   endif()
   if(${name}_FOUND)
-#    if(NOT "${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}" STREQUAL "")
-#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: ${${NAME}_VERSION} "
-#        "installed in ${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}")
-#    else()
-#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: found")
-#    endif()
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
     set(USING ${USING} ${name} PARENT_SCOPE)
@@ -188,8 +181,8 @@ function(USE_EXTERNAL name)
   endif()
 
   unset(${name}_INCLUDE_DIR CACHE)  # some find_package (boost) don't properly
-  unset(${NAME}_INCLUDE_DIR CACHE)  # unset and recheck the version on subsequent
-  unset(${name}_INCLUDE_DIRS CACHE) # runs if it failed
+  unset(${NAME}_INCLUDE_DIR CACHE)  # unset and recheck the version on
+  unset(${name}_INCLUDE_DIRS CACHE) # subsequent runs if it failed
   unset(${NAME}_INCLUDE_DIRS CACHE)
   unset(${name}_LIBRARY_DIRS CACHE)
   unset(${NAME}_LIBRARY_DIRS CACHE)
@@ -199,10 +192,6 @@ function(USE_EXTERNAL name)
     set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
     return()
   endif()
-
-#  message(STATUS   # print first for nicer output
-#    "${USE_EXTERNAL_INDENT}${name}: use ${${NAME}_REPO_URL}:${${NAME}_REPO_TAG}#"
-#    )
 
   # pull in dependent projects first
   add_custom_target(${name}-projects)
