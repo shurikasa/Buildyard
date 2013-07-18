@@ -69,6 +69,14 @@ macro(READ_CONFIG_DIR DIR)
       if(IS_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}/.git")
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" pull
+          RESULT_VARIABLE nok ERROR_VARIABLE error
+          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
+          )
+        if(nok)
+          message(FATAL_ERROR
+            "${READ_CONFIG_DIR_DEPENDS_DIR} git pull failed: ${error}\n")
+        endif()
+        execute_process(
           COMMAND "${GIT_EXECUTABLE}" checkout -q "${READ_CONFIG_DIR_DEPENDS_TAG}"
           RESULT_VARIABLE nok ERROR_VARIABLE error
           WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
