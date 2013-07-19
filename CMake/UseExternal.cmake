@@ -167,7 +167,11 @@ function(USE_EXTERNAL name)
   endif()
   if(NOT ${name}_FOUND) # try pkg-config
     if(PKG_CONFIG_FOUND)
-      pkg_check_modules(${NAME} QUIET ${name})
+      if(${NAME}_PACKAGE_VERSION)
+        pkg_check_modules(${NAME} QUIET ${name}>=${${NAME}_PACKAGE_VERSION})
+      else()
+        pkg_check_modules(${NAME} QUIET ${name})
+      endif()
       if(${NAME}_FOUND)
         set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
       endif()
