@@ -67,11 +67,14 @@ macro(READ_CONFIG_DIR DIR)
         endif()
       endif()
       if(IS_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}/.git")
-        execute_process(
-          COMMAND "${GIT_EXECUTABLE}" pull
+        execute_process( COMMAND "${GIT_EXECUTABLE}" reset -q .travis.yml
+          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
+        execute_process( COMMAND "${GIT_EXECUTABLE}" checkout -q -- .travis.yml
+          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
+        execute_process( COMMAND "${GIT_EXECUTABLE}" pull
           RESULT_VARIABLE nok ERROR_VARIABLE error
-          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
-          )
+          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
+
         if(nok)
           message(FATAL_ERROR
             "${READ_CONFIG_DIR_DEPENDS_DIR} git pull failed: ${error}\n")
