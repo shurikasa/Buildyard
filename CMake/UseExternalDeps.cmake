@@ -55,6 +55,7 @@ function(USE_EXTERNAL_DEPS name)
     "before_install:\n"
     " - sudo apt-get update -qq\n"
     " - sudo apt-get install -qq ")
+  set(_use_external_post)
 
   foreach(_dep ${${NAME}_DEPENDS})
     if(${_dep} STREQUAL "OPTIONAL")
@@ -79,22 +80,23 @@ function(USE_EXTERNAL_DEPS name)
         set(DEFDEP "${NAME}_USE_${_DEP}")
         string(REGEX REPLACE "-" "_" DEFDEP ${DEFDEP})
         file(APPEND ${_fpIn}
-          "find_package(${_dep} ${${_DEP}_PACKAGE_VERSION}${DEPMODE}${COMPONENTS})\n"
-          "if(${_dep}_FOUND)\n"
-          "  set(${_dep}_name ${_dep})\n"
-          "endif()\n"
-          "if(${_DEP}_FOUND)\n"
-          "  set(${_dep}_name ${_DEP})\n"
-          "endif()\n"
-          "if(${_dep}_name)\n"
-          "  list(APPEND FIND_PACKAGES_DEFINES ${DEFDEP})\n"
-          "  set(FIND_PACKAGES_FOUND \"\${FIND_PACKAGES_FOUND} ${_dep}\")\n"
-          "  link_directories(\${\${${_dep}_name}_LIBRARY_DIRS})\n"
-          "  if(NOT \"${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS}\" MATCHES \"-NOTFOUND\")\n"
-          "    include_directories(${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS})\n"
-          "  endif()\n"
-          "endif()\n\n"
-          )
+          "find_package(${_dep} ${${_DEP}_PACKAGE_VERSION}${DEPMODE}${COMPONENTS})\n")
+        set(_use_external_post "${_use_external_post}
+if(${_dep}_FOUND)
+  set(${_dep}_name ${_dep})
+endif()
+if(${_DEP}_FOUND)
+  set(${_dep}_name ${_DEP})
+endif()
+if(${_dep}_name)
+  list(APPEND FIND_PACKAGES_DEFINES ${DEFDEP})
+  set(FIND_PACKAGES_FOUND \"\${FIND_PACKAGES_FOUND} ${_dep}\")
+  link_directories(\${\${${_dep}_name}_LIBRARY_DIRS})
+  if(NOT \"${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS}\" MATCHES \"-NOTFOUND\")
+    include_directories(${${_DEP}_CMAKE_INCLUDE}\${\${${_dep}_name}_INCLUDE_DIRS})
+  endif()
+endif()
+")
       endif()
     endif()
   endforeach()
@@ -108,12 +110,10 @@ function(USE_EXTERNAL_DEPS name)
     "if(EXISTS \${CMAKE_SOURCE_DIR}/CMake/FindPackagesPost.cmake)\n"
     "  include(\${CMAKE_SOURCE_DIR}/CMake/FindPackagesPost.cmake)\n"
     "endif()\n"
-    )
+    "${_use_external_post}\n")
 
   if(${NAME}_DEBS)  # setup for CPACK_DEBIAN_BUILD_DEPENDS
-    file(APPEND ${_fpIn} "\n"
-      "set(${NAME}_BUILD_DEBS ${${NAME}_DEBS})\n"
-    )
+    file(APPEND ${_fpIn} "set(${NAME}_BUILD_DEBS ${${NAME}_DEBS})\n")
   endif()
 
   file(APPEND ${_fpIn} "\n"
@@ -154,7 +154,11 @@ function(USE_EXTERNAL_DEPS name)
     "  string(REPLACE \"-std=c++0x\" \"\" CUDA_HOST_FLAGS \"\${CUDA_HOST_FLAGS}\")\n"
     "endif()\n"
     "if(FIND_PACKAGES_FOUND)\n"
-    "  message(STATUS \"Configured with \${CMAKE_BUILD_TYPE}\${FIND_PACKAGES_FOUND}\")\n"
+    "  if(MSVC)\n"
+    "    message(STATUS \"Configured with \${FIND_PACKAGES_FOUND}\")\n"
+    "  else()\n"
+    "    message(STATUS \"Configured with \${CMAKE_BUILD_TYPE}\${FIND_PACKAGES_FOUND}\")\n"
+    "  endif()\n"
     "endif()\n"
     )
 
