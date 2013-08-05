@@ -3,6 +3,7 @@
 
 find_package(Git REQUIRED)
 find_package(PkgConfig)
+find_package(Subversion)
 
 include(SCM)
 include(ExternalProject)
@@ -272,7 +273,12 @@ function(USE_EXTERNAL name)
     set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${REPO_TAG_VALUE} || ${GIT_EXECUTABLE} status
         ALWAYS TRUE)
   elseif(REPO_TYPE STREQUAL "SVN")
-    find_package(Subversion REQUIRED)
+    if(NOT SUBVERSION_FOUND)
+      message(STATUS "Skip ${name}: missing subversion")
+      set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
+      set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
+      return()
+    endif()
     set(REPO_TAG SVN_REVISION)
   elseif(REPO_TYPE STREQUAL "FILE")
     set(DOWNLOAD_CMD URL)
