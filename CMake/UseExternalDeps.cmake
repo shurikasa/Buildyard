@@ -33,7 +33,13 @@ function(USE_EXTERNAL_DEPS name)
   set(_fpOut "${${NAME}_SOURCE}/CMake/FindPackages.cmake")
   set(_ciIn "${CMAKE_CURRENT_BINARY_DIR}/${name}Travis.yml")
   set(_ciOut "${${NAME}_SOURCE}/.travis.yml")
+  set(_configIn "${CMAKE_CURRENT_BINARY_DIR}/${name}Config.cmake")
+  set(_configOut "${${NAME}_SOURCE}/CMake/${name}.cmake")
+  set(_dependsIn ${${NAME}_DEPENDSTXT})
+  set(_dependsOut "${${NAME}_SOURCE}/CMake/depends.txt")
+
   set(_scriptdir ${CMAKE_CURRENT_BINARY_DIR}/${name})
+  set(_generated ${_fpOut} ${_ciOut} ${_configOut} ${_dependsOut})
   set(DEPMODE)
 
   set(_deps)
@@ -162,28 +168,36 @@ endif()
     "endif()\n"
     )
 
-  file(WRITE ${_scriptdir}/writeDeps.cmake
-    "list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)\n"
-    "include(UpdateFile)\n"
-    "update_file(${_fpIn} ${_fpOut})\n"
-    "update_file(${_ciIn} ${_ciOut})\n")
+  file(READ ${${NAME}_CONFIGFILE} _configfile)
+  file(WRITE ${_configIn} "
+${_configfile}
+set(${NAME}_REPO_TAG HEAD)
+set(${NAME}_FORCE_BUILD ON)
+set(${NAME}_SOURCE \${CMAKE_SOURCE_DIR})")
+
+  file(WRITE ${_scriptdir}/writeDeps.cmake "
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
+include(UpdateFile)
+update_file(${_fpIn} ${_fpOut})
+update_file(${_ciIn} ${_ciOut})
+update_file(${_configIn} ${_configOut})
+update_file(${_dependsIn} ${_dependsOut})
+")
 
   setup_scm(${name})
-  ExternalProject_Add_Step(${name} rmFindPackages
-    COMMENT "Resetting FindPackages"
-    COMMAND ${SCM_RESET} CMake/FindPackages.cmake || ${CMAKE_COMMAND} -E remove CMake/FindPackages.cmake
-    WORKING_DIRECTORY "${${NAME}_SOURCE}"
-    DEPENDEES mkdir DEPENDERS download ALWAYS 1
-    )
-  ExternalProject_Add_Step(${name} rmTravis
-    COMMENT "Resetting travis.yml"
-    COMMAND ${SCM_RESET} .travis.yml || ${CMAKE_COMMAND} -E remove .travis.yml
-    WORKING_DIRECTORY "${${NAME}_SOURCE}"
-    DEPENDEES rmFindPackages DEPENDERS download ALWAYS 1
-    )
+  set(_rmGeneratedLast)
+  foreach(_rmGenerated ${_generated})
+    get_filename_component(_baseGenerated ${_rmGenerated} NAME)
+    ExternalProject_Add_Step(${name} rm${_baseGenerated}
+      COMMENT "Resetting ${_baseGenerated}"
+      COMMAND ${SCM_RESET} ${_rmGenerated} || ${CMAKE_COMMAND} -E remove ${_rmGenerated}
+      WORKING_DIRECTORY "${${NAME}_SOURCE}"
+      DEPENDEES mkdir ${_rmGeneratedLast} DEPENDERS download ALWAYS 1)
+    set(_rmGeneratedLast rm${_baseGenerated})
+  endforeach()
 
-  ExternalProject_Add_Step(${name} FindPackages
-    COMMENT "Updating ${_fpOut}, ${_ciOut}"
+  ExternalProject_Add_Step(${name} Generate
+    COMMENT "Updating ${_generated}"
     COMMAND ${CMAKE_COMMAND} -DBUILDYARD:PATH=${CMAKE_SOURCE_DIR}
             -P ${_scriptdir}/writeDeps.cmake
     DEPENDEES update DEPENDERS configure DEPENDS ${${NAME}_CONFIGFILE}
