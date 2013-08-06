@@ -119,6 +119,11 @@ of the project, causing the project to be always build from source.
 Below are the targets in addition to the standard targets of
 ExternalProject.cmake:
 
+### NAME-buildall
+
+Builds the given project and all its dependencies w/o performing download and update step for each project.
+This requires successful bootstrapping of each project.
+
 ### NAME-buildonly
 
 Builds only the the given project without considering dependencies,
