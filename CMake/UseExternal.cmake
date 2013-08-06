@@ -32,7 +32,7 @@ set_target_properties(AllProjects PROPERTIES FOLDER "00_Main")
 add_custom_target(Buildyard-stat
   COMMAND ${GIT_EXECUTABLE} status -s --untracked-files=no
   COMMENT "Buildyard Status:"
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   )
 set_target_properties(Buildyard-stat PROPERTIES EXCLUDE_FROM_ALL ON)
 add_dependencies(stats Buildyard-stat)
@@ -131,7 +131,7 @@ function(USE_EXTERNAL name)
   set(SHORT_ROOT ${SHORT_NAME}_ROOT)
   set(SHORT_ENVROOT $ENV{${SHORT_ROOT}})
   if(NOT ${NAME}_SOURCE)
-    set(${NAME}_SOURCE "${CMAKE_SOURCE_DIR}/src/${name}")
+    set(${NAME}_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/${name}")
   endif()
 
   # CMake module search path

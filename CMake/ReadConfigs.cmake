@@ -1,8 +1,10 @@
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 # Does a use_external(..) for each config*/*.cmake project.
 
+include(Common)
 include(UseExternal)
 include(CreateDependencyGraph)
+include(GitExternal)
 include(GitTargets)
 
 if(APPLE)
@@ -50,45 +52,15 @@ macro(READ_CONFIG_DIR DIR)
       list(REMOVE_AT READ_CONFIG_DIR_DEPENDS 0 1 2)
       list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
       set(READ_CONFIG_DIR_DEPENDS_DIR
-        "${CMAKE_SOURCE_DIR}/${READ_CONFIG_DIR_DEPENDS_DIR}")
+        "${CMAKE_CURRENT_SOURCE_DIR}/${READ_CONFIG_DIR_DEPENDS_DIR}")
 
       message(STATUS
         "Using ${READ_CONFIG_DIR_DEPENDS_REPO}:${READ_CONFIG_DIR_DEPENDS_TAG}"
         " for ${READ_CONFIG_DIR_DEPENDS_DIR}")
-      if(NOT IS_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
-        execute_process(
-          COMMAND "${GIT_EXECUTABLE}" clone "${READ_CONFIG_DIR_DEPENDS_REPO}"
-            "${READ_CONFIG_DIR_DEPENDS_DIR}"
-          RESULT_VARIABLE nok ERROR_VARIABLE error
-          WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-        if(nok)
-          message(FATAL_ERROR
-            "${READ_CONFIG_DIR_DEPENDS_DIR} git clone failed: ${error}\n")
-        endif()
-      endif()
-      if(IS_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}/.git")
-        execute_process( COMMAND "${GIT_EXECUTABLE}" reset -q .travis.yml
-          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
-        execute_process( COMMAND "${GIT_EXECUTABLE}" checkout -q -- .travis.yml
-          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
-        execute_process( COMMAND "${GIT_EXECUTABLE}" pull
-          RESULT_VARIABLE nok ERROR_VARIABLE error
-          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
-
-        if(nok)
-          message(WARNING
-            "Update of ${READ_CONFIG_DIR_DEPENDS_DIR} failed: ${error}\n")
-        endif()
-        execute_process(
-          COMMAND "${GIT_EXECUTABLE}" checkout -q "${READ_CONFIG_DIR_DEPENDS_TAG}"
-          RESULT_VARIABLE nok ERROR_VARIABLE error
-          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
-          )
-        if(nok)
-          message(FATAL_ERROR
-            "${READ_CONFIG_DIR_DEPENDS_DIR} git checkout ${READ_CONFIG_DIR_DEPENDS_TAG} failed: ${error}\n")
-        endif()
-      endif()
+      git_external("${READ_CONFIG_DIR_DEPENDS_DIR}"
+        "${READ_CONFIG_DIR_DEPENDS_REPO}"
+        "${READ_CONFIG_DIR_DEPENDS_TAG}"
+        RESET .travis.yml)
       read_config_dir(${READ_CONFIG_DIR_DEPENDS_DIR})
     endwhile()
 
@@ -96,11 +68,12 @@ macro(READ_CONFIG_DIR DIR)
     set(_localFiles)
     if(EXISTS "${DIR}/depends.txt")
       set(_localFiles "${DIR}/depends.txt")
-      string(REPLACE "${CMAKE_SOURCE_DIR}/" "" _localFiles ${_localFiles})
+      string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _localFiles
+        ${_localFiles})
     endif()
     foreach(_config ${_files})
       include(${_config})
-      string(REPLACE "${CMAKE_SOURCE_DIR}/" "" _config ${_config})
+      string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _config ${_config})
       list(APPEND _localFiles ${_config})
     endforeach()
 
@@ -108,7 +81,7 @@ macro(READ_CONFIG_DIR DIR)
       string(REGEX REPLACE ".*\\.([a-zA-Z0-9]+)$" "\\1" DIRID ${DIR})
       if(NOT "${DIR}" STREQUAL "${DIRID}")
         add_custom_target(tarball-${DIRID}
-          COMMAND ${TAR_EXE} rf ${TARBALL} --transform 's:^:${CMAKE_PROJECT_NAME}-${VERSION}/:' -C "${CMAKE_SOURCE_DIR}" ${_localFiles}
+          COMMAND ${TAR_EXE} rf ${TARBALL} --transform 's:^:${CMAKE_PROJECT_NAME}-${VERSION}/:' -C "${CMAKE_CURRENT_SOURCE_DIR}" ${_localFiles}
           COMMENT "Adding ${DIRID}"
           DEPENDS tarball-${TARBALL_CHAIN})
         set(TARBALL_CHAIN ${DIRID})
@@ -118,7 +91,7 @@ macro(READ_CONFIG_DIR DIR)
 endmacro()
 
 set(_configs)
-file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
+file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
 
 list(LENGTH _dirs _dirs_num)
 if(_dirs_num LESS 2)
@@ -126,8 +99,8 @@ if(_dirs_num LESS 2)
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" clone https://github.com/Eyescale/config.git
       config.eyescale
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-  file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+  file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
 endif()
 
 set(TARBALL_CHAIN create)
@@ -139,7 +112,7 @@ foreach(_dir ${_dirs})
   endif()
 endforeach()
 
-if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config.local)
+if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/config.local)
   message(STATUS "Reading overrides from config.local")
   file(GLOB _files "config.local/*.cmake")
   foreach(_config ${_files})
@@ -148,31 +121,31 @@ if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config.local)
 endif()
 
 set(_configs)
-if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/.git")
+if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
   if(BUILDYARD_REV)
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     add_custom_target(update)
   else()
     add_custom_target(update
       COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
       COMMENT "Updating Buildyard"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
   endif()
 else()
   add_custom_target(update)
 endif()
-if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local/.git")
+if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config.local/.git")
   add_custom_target(config.local-update
     COMMAND ${GIT_EXECUTABLE} pull
     COMMENT "Updating config.local"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config.local"
     )
   add_dependencies(update config.local-update)
 endif()
 
-file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
+file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
 foreach(_dir ${_dirs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
     message(STATUS "Reading ${_dir}")
@@ -194,7 +167,8 @@ foreach(_dir ${_dirs})
         set(${_GROUP}_DOC_PROJECT "${_group}") # automagic doc project
       endif()
       if(${_GROUP}_DOC_PROJECT) # set in config.group/Buildyard.cmake
-        set(_dest "${CMAKE_SOURCE_DIR}/src/${${_GROUP}_DOC_PROJECT}/images")
+        set(_dest
+          "${CMAKE_CURRENT_SOURCE_DIR}/src/${${_GROUP}_DOC_PROJECT}/images")
       endif()
     endif()
 

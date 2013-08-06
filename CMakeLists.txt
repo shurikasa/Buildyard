@@ -9,9 +9,7 @@ set(VERSION_MINOR "6")
 set(VERSION_PATCH "0")
 set(RELEASE_VERSION 0) # OFF or ABI version
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 set(GITTARGETS_RELEASE_BRANCH current)
 
-include(Common)
 include(ReadConfigs)
-include(GitTargets)
