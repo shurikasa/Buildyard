@@ -326,6 +326,8 @@ function(USE_EXTERNAL name)
     ${${NAME}_EXTRA}
     STEP_TARGETS ${USE_EXTERNAL_SUBTARGETS}
    )
+  set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL ON)
+
   use_external_buildonly(${name})
   file(APPEND ${CMAKE_BINARY_DIR}/projects.make
     "${name}-%:\n"

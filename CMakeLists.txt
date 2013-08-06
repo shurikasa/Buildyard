@@ -13,3 +13,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 set(GITTARGETS_RELEASE_BRANCH current)
 
 include(ReadConfigs)
+add_custom_target(default ALL)
+
+if(BUILDYARD_TARGETS)
+  add_dependencies(default ${BUILDYARD_TARGETS})
+else()
+  add_dependencies(default ${BUILDING})
+endif()
