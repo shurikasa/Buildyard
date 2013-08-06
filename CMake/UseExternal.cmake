@@ -292,7 +292,7 @@ function(USE_EXTERNAL name)
       set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
       return()
     endif()
-    set(${NAME}_EXTRA "${${NAME}_EXTRA} CONFIGURE_COMMAND ${CMAKE_COMMAND} -P ${name}_configure_cmd.cmake")
+    set(${NAME}_EXTRA ${${NAME}_EXTRA} CONFIGURE_COMMAND ${CMAKE_COMMAND} -P ${name}_configure_cmd.cmake)
   endif()
 
   set(INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install")
