@@ -35,7 +35,7 @@ function(USE_EXTERNAL_DEPS name)
   set(_ciOut "${${NAME}_SOURCE}/.travis.yml")
   set(_configIn "${CMAKE_CURRENT_BINARY_DIR}/${name}Config.cmake")
   set(_configOut "${${NAME}_SOURCE}/CMake/${name}.cmake")
-  set(_dependsIn ${${NAME}_DEPENDSTXT})
+  set(_dependsIn "${CMAKE_CURRENT_BINARY_DIR}/${name}Depends.txt")
   set(_dependsOut "${${NAME}_SOURCE}/CMake/depends.txt")
 
   set(_scriptdir ${CMAKE_CURRENT_BINARY_DIR}/${name})
@@ -174,6 +174,9 @@ ${_configfile}
 set(${NAME}_REPO_TAG HEAD)
 set(${NAME}_FORCE_BUILD ON)
 set(${NAME}_SOURCE \${CMAKE_SOURCE_DIR})")
+
+  file(WRITE ${_dependsIn}
+    "config.${${NAME}_GROUP} ${${${NAME}_GROUP}_CONFIGURL} master")
 
   file(WRITE ${_scriptdir}/writeDeps.cmake "
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
