@@ -76,8 +76,8 @@ macro(READ_CONFIG_DIR DIR)
           WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
 
         if(nok)
-          message(FATAL_ERROR
-            "${READ_CONFIG_DIR_DEPENDS_DIR} git pull failed: ${error}\n")
+          message(WARNING
+            "Update of ${READ_CONFIG_DIR_DEPENDS_DIR} failed: ${error}\n")
         endif()
         execute_process(
           COMMAND "${GIT_EXECUTABLE}" checkout -q "${READ_CONFIG_DIR_DEPENDS_TAG}"
@@ -86,7 +86,7 @@ macro(READ_CONFIG_DIR DIR)
           )
         if(nok)
           message(FATAL_ERROR
-            "${READ_CONFIG_DIR_DEPENDS_DIR} git update failed: ${error}\n")
+            "${READ_CONFIG_DIR_DEPENDS_DIR} git checkout ${READ_CONFIG_DIR_DEPENDS_TAG} failed: ${error}\n")
         endif()
       endif()
       read_config_dir(${READ_CONFIG_DIR_DEPENDS_DIR})
