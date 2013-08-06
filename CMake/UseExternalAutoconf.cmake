@@ -25,7 +25,7 @@ function(USE_EXTERNAL_AUTOCONF name)
 
   file(WRITE ${${NAME}_CONFIGURE_CMD}
     "if(NOT EXISTS ${${NAME}_SOURCE}/configure)\n"
-    "  execute_process(COMMAND autoreconf -i\n"
+    "  execute_process(COMMAND ${AUTORECONF_EXE} -i\n"
     "    WORKING_DIRECTORY ${${NAME}_SOURCE})\n"
     "endif()\n"
     "if(NOT EXISTS ${CMAKE_BINARY_DIR}/${name}/config.status)\n"

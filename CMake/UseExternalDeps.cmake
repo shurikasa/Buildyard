@@ -3,7 +3,7 @@
 
 function(USE_EXTERNAL_GATHER_DEBS NAME)
   # sets ${NAME}_DEBS from all dependencies on return
-  set(DEBS pkg-config git git-svn subversion cmake)
+  set(DEBS pkg-config git git-svn subversion cmake autoconf automake)
   set(DEPENDS)
   set(${UPPER_NAME}_DEBS)
 

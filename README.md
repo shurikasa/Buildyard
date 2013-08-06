@@ -76,7 +76,7 @@ configuration file, for example
 [Equalizer.cmake](https://github.com/Eyescale/config/blob/master/Equalizer.cmake).
 It contains the following variables:
 
-* NAME\_VERSION: the required version of the project
+* NAME\_VERSION: the required version of the project.
 * NAME\_DEPENDS: list of dependencies, OPTIONAL and REQUIRED keywords
   are recognized. Projects with missing required dependencies will not
   be configured.
@@ -88,8 +88,10 @@ It contains the following variables:
   as required by the project find script. Default is NAME\_ROOT.
 * NAME\_TAIL\_REVISION: The oldest revision a git-svn repository should
   be cloned with.
-* NAME\_CMAKE\_ARGS Additional CMake arguments for the configure
+* NAME\_CMAKE\_ARGS: Additional CMake arguments for the configure
   step. The character '!' can be used to separate list items.
+* NAME\_AUTOCONF: when set to true, the autoconf build system is used to
+  build the project.
 
 ## Extending
 
