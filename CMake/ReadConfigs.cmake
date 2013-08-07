@@ -212,6 +212,9 @@ if(NOT BOOST_FORCE_BUILD)
 endif()
 
 # configure projects
+if(BUILDYARD_TARGETS)
+  set(_configs ${BUILDYARD_TARGETS})
+endif()
 list(SORT _configs)
 foreach(_config ${_configs})
   string(TOUPPER ${_config} _CONFIG)
