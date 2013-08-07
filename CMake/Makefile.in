@@ -19,7 +19,7 @@ configure:
 	@@CMAKE_COMMAND@ @CMAKE_BINARY_DIR@/@name@
 
 test:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-testonly
+	@$(MAKE) --no-print-directory -C @BUILDYARD@/$(BUILD)/@name@ tests
 
 clean:
 	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-clean
