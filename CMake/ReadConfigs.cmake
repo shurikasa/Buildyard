@@ -259,7 +259,8 @@ foreach(_dir ${_dirs})
         "\nscript:\n"
         " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
         " - cd Buildyard\n"
-        " - git clone --depth 1 ${${_group}_CONFIGURL} ${_dirName}\n"
+        " - mkdir config.travis\n"
+        " - cp -a ../*.cmake ../depends.txt config.travis\n"
         " - env TRAVIS=1 make tests\n")
     endif()
   endif()
