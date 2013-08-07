@@ -392,6 +392,7 @@ function(USE_EXTERNAL name)
     WORKING_DIRECTORY "${${NAME}_SOURCE}"
     )
   set_target_properties(${name}-stat PROPERTIES EXCLUDE_FROM_ALL ON)
+  add_dependencies(stats ${name}-stat)
 
   add_custom_target(${name}-reset
     COMMAND ${SCM_UNSTAGE}
@@ -439,19 +440,18 @@ function(USE_EXTERNAL name)
   set_target_properties(${name}-deps PROPERTIES EXCLUDE_FROM_ALL ON)
 
   # disable tests if requested
-  if(${${NAME}_NOTEST})
+  if(${NAME}_NOTEST)
     set(${NAME}_NOTESTONLY ON)
   endif()
 
-  # make optional if requested
-  if(${${NAME}_OPTIONAL})
-    set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL ON)
-    foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
-      set_target_properties(${name}-${subtarget} PROPERTIES EXCLUDE_FROM_ALL ON)
-    endforeach()
-    add_dependencies(stats ${name}-stat)
-  else()
-    # add to meta sub-targets
+  foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
+    set_target_properties(${name}-${subtarget} PROPERTIES EXCLUDE_FROM_ALL ON)
+  endforeach()
+
+  if(${NAME}_OPTIONAL)
+    set_target_properties(${name} PROPERTIES _EP_IS_OPTIONAL_PROJECT ON)
+    get_target_property(_optional ${name} _EP_IS_OPTIONAL_PROJECT)
+  else() # add non-optional sub-targets to meta sub-targets
     foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
       string(TOUPPER ${subtarget} UPPER_SUBTARGET)
       if(NOT ${NAME}_NO${UPPER_SUBTARGET})
