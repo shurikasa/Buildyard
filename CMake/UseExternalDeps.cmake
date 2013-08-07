@@ -54,7 +54,7 @@ function(USE_EXTERNAL_DEPS name)
     "script:\n"
     " - mkdir Build\n"
     " - cd Build\n"
-    " - cmake ..\n"
+    " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT\n"
     " - env TRAVIS=1 make -j8 ${name}-test ARGS=-V\n"
     "before_install:\n"
     " - sudo apt-get update -qq\n"
@@ -169,7 +169,11 @@ endif()
   file(READ ${${NAME}_CONFIGFILE} _configfile)
   file(WRITE ${_configIn} "
 ${_configfile}
-set(${NAME}_REPO_TAG HEAD)
+if(CI_BUILD_COMMIT)
+  set(${NAME}_REPO_TAG \${CI_BUILD_COMMIT})
+else()
+  set(${NAME}_REPO_TAG master)
+endif()
 set(${NAME}_FORCE_BUILD ON)
 set(${NAME}_SOURCE \${CMAKE_SOURCE_DIR})")
 
