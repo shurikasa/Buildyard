@@ -163,6 +163,14 @@ directory.
 
 ## Tips and Tricks
 
+### Bootstrapping from project source
+
+Buildyard does configure the project so it can self-bootstrap. This
+requires the
+[CMake subtree](https://github.com/Eyescale/CMake/blob/master/README.md)
+in the project and the setup described in
+[CMake/Buildyard.cmake](https://github.com/Eyescale/CMake/blob/master/README.md).
+
 ### Macports files
 
 Buildyard automatically creates portfiles for MacPorts. Simply add
