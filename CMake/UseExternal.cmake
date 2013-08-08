@@ -25,9 +25,10 @@ foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   set_target_properties(${subtarget}s PROPERTIES FOLDER "00_Meta")
 endforeach()
 add_custom_target(AllProjects)
-add_custom_target(buildall)
-add_dependencies(updates update)
 set_target_properties(AllProjects PROPERTIES FOLDER "00_Main")
+add_custom_target(AllBuild)
+set_target_properties(AllBuild PROPERTIES FOLDER "00_Main")
+add_dependencies(updates update)
 
 add_custom_target(Buildyard-stat
   COMMAND ${GIT_EXECUTABLE} status -s --untracked-files=no
@@ -459,7 +460,7 @@ function(USE_EXTERNAL name)
       endif()
     endforeach()
     add_dependencies(AllProjects ${name})
-    add_dependencies(buildall ${name}-buildall)
+    add_dependencies(AllBuild ${name}-buildall)
   endif()
 
   set_target_properties(${name} PROPERTIES FOLDER "00_Main")
