@@ -44,7 +44,7 @@ Debug/Makefile:
 	@mkdir -p Debug
 	@cd Debug; cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-release: Release/Makefile
+release: Release/Makefile | debug
 	@$(MAKE) --no-print-directory -C Release
 
 Release/Makefile:
