@@ -262,6 +262,7 @@ foreach(_dir ${_dirs})
         " - cd Buildyard\n"
         " - mkdir config.travis\n"
         " - cp ../*.* config.travis\n"
+        " - env TRAVIS=1 make -j8 debug release\n"
         " - env TRAVIS=1 make tests\n")
     endif()
   endif()
