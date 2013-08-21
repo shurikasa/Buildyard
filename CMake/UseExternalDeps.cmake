@@ -57,11 +57,11 @@ function(USE_EXTERNAL_DEPS name)
     " - mkdir Debug\n"
     " - cd Debug\n"
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Debug\n"
-    " - env TRAVIS=1 make -j8 ${name}-test ARGS=-V\n"
+    " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
     " - mkdir ../Release\n"
     " - cd ../Release\n"
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Release\n"
-    " - env TRAVIS=1 make -j8 ${name}-test ARGS=-V\n"
+    " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
     "before_install:\n"
     " - sudo apt-get update -qq\n"
     " - sudo apt-get install -qq ")
