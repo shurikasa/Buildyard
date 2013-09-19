@@ -158,10 +158,11 @@ function(USE_EXTERNAL name)
     if(USE_EXTERNAL_COMPONENTS)
       string(REGEX REPLACE  " " ";" USE_EXTERNAL_COMPONENTS
         ${USE_EXTERNAL_COMPONENTS})
-      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET
+      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET ${${NAME}_FIND_ARGS}
         COMPONENTS ${USE_EXTERNAL_COMPONENTS})
     else()
-      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET)
+      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET
+        ${${NAME}_FIND_ARGS})
     endif()
   endif()
   if(${NAME}_FOUND)

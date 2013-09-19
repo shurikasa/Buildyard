@@ -88,7 +88,7 @@ function(USE_EXTERNAL_DEPS name)
         set(DEFDEP "${NAME}_USE_${_DEP}")
         string(REGEX REPLACE "-" "_" DEFDEP ${DEFDEP})
         file(APPEND ${_fpIn}
-          "find_package(${_dep} ${${_DEP}_PACKAGE_VERSION}${DEPMODE}${COMPONENTS})\n")
+          "find_package(${_dep} ${${_DEP}_PACKAGE_VERSION} ${${_DEP}_FIND_ARGS}${DEPMODE}${COMPONENTS})\n")
         set(_use_external_post "${_use_external_post}
 if(${_dep}_FOUND)
   set(${_dep}_name ${_dep})
@@ -141,10 +141,10 @@ endif()
     "  \"#define \${CMAKE_PROJECT_NAME}_DEFINES_\${SYSTEM}_H\\n\\n\")\n"
     "file(WRITE \${OPTIONS_CMAKE} \"# Optional modules enabled during build\\n\")\n"
     "foreach(DEF \${FIND_PACKAGES_DEFINES})\n"
-    "  add_definitions(-D\${DEF})\n"
+    "  add_definitions(-D\${DEF}=1)\n"
     "  file(APPEND \${DEFINES_FILE_IN}\n"
     "  \"#ifndef \${DEF}\\n\"\n"
-    "  \"#  define \${DEF}\\n\"\n"
+    "  \"#  define \${DEF} 1\\n\"\n"
     "  \"#endif\\n\")\n"
     "if(NOT DEF STREQUAL SYSTEM)\n"
     "  file(APPEND \${OPTIONS_CMAKE} \"set(\${DEF} ON)\\n\")\n"
