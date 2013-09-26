@@ -3,7 +3,7 @@
 
 function(USE_EXTERNAL_GATHER_DEBS NAME)
   # sets ${NAME}_DEBS from all dependencies on return
-  set(DEBS pkg-config git git-svn subversion cmake autoconf automake)
+  set(DEBS pkg-config git git-svn subversion cmake autoconf automake git-review)
 
   # recurse to get dependency roots
   foreach(proj ${${NAME}_DEPENDS})
