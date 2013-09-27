@@ -257,7 +257,8 @@ foreach(_dir ${_dirs})
         file(APPEND ${_dir}/.travis.yml "${_dep} ")
       endforeach()
       file(APPEND ${_dir}/.travis.yml
-        "\nscript:\n"
+        " || /bin/true\n"
+        "script:\n"
         " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
         " - cd Buildyard\n"
         " - mkdir config.travis\n"

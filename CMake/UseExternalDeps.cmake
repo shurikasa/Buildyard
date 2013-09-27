@@ -131,6 +131,7 @@ endif()
   foreach(_dep ${${NAME}_DEBS})
     file(APPEND ${_ciIn} "${_dep} ")
   endforeach()
+  file(APPEND ${_ciIn} " || /bin/true\n")
 
   file(APPEND ${_fpIn} "\n"
     "if(EXISTS \${CMAKE_SOURCE_DIR}/CMake/FindPackagesPost.cmake)\n"
