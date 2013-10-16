@@ -251,12 +251,12 @@ function(USE_EXTERNAL name)
     set(REPO_TYPE git)
   endif()
   string(TOUPPER ${REPO_TYPE} REPO_TYPE)
-  set(DOWNLOAD_CMD ${REPO_TYPE}_REPOSITORY)
+  set(REPOSITORY ${REPO_TYPE}_REPOSITORY)
   if(REPO_TYPE STREQUAL "GIT-SVN")
     set(REPO_TYPE GIT)
     set(REPO_TAG GIT_TAG)
     set(GIT_SVN "svn")
-    set(DOWNLOAD_CMD ${REPO_TYPE}_REPOSITORY)
+    set(REPOSITORY ${REPO_TYPE}_REPOSITORY)
     # svn rebase fails with local modifications, ignore
     set(UPDATE_CMD ${GIT_EXECUTABLE} svn rebase || ${GIT_EXECUTABLE} status
       ALWAYS TRUE)
@@ -265,9 +265,8 @@ function(USE_EXTERNAL name)
     set(REPO_ORIGIN_URL ${${NAME}_REPO_URL})
     set(REPO_USER_URL ${${NAME}_USER_URL})
     set(REPO_ORIGIN_NAME ${${NAME}_ORIGIN_NAME})
-    set(REPO_TAG_VALUE ${${NAME}_REPO_TAG})
-    if(NOT REPO_TAG_VALUE)
-      set(REPO_TAG_VALUE "master")
+    if(NOT ${NAME}_REPO_TAG)
+      set(${NAME}_REPO_TAG "master")
     endif()
     if(NOT REPO_ORIGIN_NAME)
       if(REPO_ORIGIN_URL AND REPO_USER_URL)
@@ -277,7 +276,7 @@ function(USE_EXTERNAL name)
       endif()
     endif()
     # pull fails if tag is a SHA hash, use git status to set exit value to true
-    set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${REPO_TAG_VALUE} || ${GIT_EXECUTABLE} status
+    set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${${NAME}_REPO_TAG} || ${GIT_EXECUTABLE} status
         ALWAYS TRUE)
   elseif(REPO_TYPE STREQUAL "SVN")
     if(NOT SUBVERSION_FOUND)
@@ -290,7 +289,7 @@ function(USE_EXTERNAL name)
     endif()
     set(REPO_TAG SVN_REVISION)
   elseif(REPO_TYPE STREQUAL "FILE")
-    set(DOWNLOAD_CMD URL)
+    set(REPOSITORY URL)
   else()
     message(FATAL_ERROR "Unknown repository type ${REPO_TYPE}")
   endif()
@@ -329,7 +328,7 @@ function(USE_EXTERNAL name)
     SOURCE_DIR "${${NAME}_SOURCE}"
     INSTALL_DIR "${INSTALL_PATH}"
     DEPENDS "${DEPENDS}"
-    ${DOWNLOAD_CMD} ${${NAME}_REPO_URL}
+    ${REPOSITORY} ${${NAME}_REPO_URL}
     ${REPO_TAG} ${${NAME}_REPO_TAG}
     UPDATE_COMMAND ${UPDATE_CMD}
     CMAKE_ARGS ${ARGS}
