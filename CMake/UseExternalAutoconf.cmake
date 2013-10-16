@@ -24,6 +24,7 @@ function(USE_EXTERNAL_AUTOCONF name)
   endif()
 
   file(WRITE ${${NAME}_CONFIGURE_CMD}
+    "${${NAME}_PRE_CONFIGURE}\n"
     "if(NOT EXISTS ${${NAME}_SOURCE}/configure)\n"
     "  execute_process(COMMAND ${AUTORECONF_EXE} -i\n"
     "    WORKING_DIRECTORY ${${NAME}_SOURCE})\n"
@@ -32,7 +33,7 @@ function(USE_EXTERNAL_AUTOCONF name)
     "  set(ENV{CFLAGS} ${CFLAGS})\n"
     "  set(ENV{CXXFLAGS} ${CXXFLAGS})\n"
     "  set(ENV{LDFLAGS} ${LDFLAGS})\n"
-    "  execute_process(COMMAND ${${NAME}_SOURCE}/configure --prefix=${CMAKE_CURRENT_BINARY_DIR}/install\n"
+    "  execute_process(COMMAND ${${NAME}_SOURCE}/configure --prefix=${CMAKE_CURRENT_BINARY_DIR}/install ${${NAME}_CONFIGURE_FLAGS}\n"
     "    WORKING_DIRECTORY ${${NAME}_CONFIGURE_DIR}\n"
     "    RESULT_VARIABLE ERROR)\n"
     "  if(ERROR)\n"
