@@ -92,6 +92,8 @@ It contains the following variables:
   step. The character '!' can be used to separate list items.
 * NAME\_AUTOCONF: when set to true, the autoconf build system is used to
   build the project.
+* NAME\_DEB\_DEPENDS: Debian package names of dependencies. Used for
+  apt-get target and Travis CI configuration files.
 
 ## Extending
 
