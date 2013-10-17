@@ -251,13 +251,12 @@ foreach(_dir ${_dirs})
         "language: cpp\n"
         "# compiler: clang\n"
         "before_install:\n"
-        " - sudo apt-get update -qq\n"
-        " - sudo apt-get install -qq ")
+        " - sudo apt-get update -qq\n")
       foreach(_dep ${DEBS})
-        file(APPEND ${_dir}/.travis.yml "${_dep} ")
+        file(APPEND ${_dir}/.travis.yml
+          " - sudo apt-get install -qq ${_dep} || /bin/true\n")
       endforeach()
       file(APPEND ${_dir}/.travis.yml
-        " || /bin/true\n"
         "script:\n"
         " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
         " - cd Buildyard\n"
