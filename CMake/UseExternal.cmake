@@ -169,7 +169,7 @@ function(USE_EXTERNAL name)
     set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
   endif()
   if(NOT ${name}_FOUND) # try pkg-config
-    if(PKG_CONFIG_FOUND)
+    if(PKG_CONFIG_EXECUTABLE)
       if(${NAME}_PACKAGE_VERSION)
         pkg_check_modules(${NAME} QUIET ${name}>=${${NAME}_PACKAGE_VERSION})
       else()

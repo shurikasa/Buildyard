@@ -134,7 +134,7 @@ set(FIND_REQUIRED_FAILED)")
 
         # Try to find the dependency
         file(APPEND ${_fpIn}
-          "if(PKG_CONFIG_FOUND)\n"
+          "if(PKG_CONFIG_EXECUTABLE)\n"
           "  find_package(${_dep} ${${_DEP}_PACKAGE_VERSION}${${_DEP}_FIND_ARGS}${COMPONENTS_NOT_REQUIRED})\n"
           "  if((NOT ${_dep}_FOUND) AND (NOT ${_DEP}_FOUND))\n"
           "    ${pkg_command}\n"
