@@ -44,7 +44,7 @@ function(USE_EXTERNAL_DEPS name)
   set(DEPMODE)
 
   set(_deps)
-  
+
   #----------------------------------------------------------------------------
   #---- Generate FindPackages.cmake header
   #----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ set(FIND_REQUIRED_FAILED)")
   # Iterate through the dependencies found:
   #
   # Dependencies come as a list of space separated words, these words can
-  # either be REQUIRED, OPTIONAL or an actual dependency name. When REQUIRED or 
+  # either be REQUIRED, OPTIONAL or an actual dependency name. When REQUIRED or
   # OPTIONAL are found the flag DEPMODE is set accordingly. When an actual
   # dependency is found, different checks are perfomed depending on the
   # dependency being REQUIRED or not, and having components or not.
@@ -97,11 +97,11 @@ set(FIND_REQUIRED_FAILED)")
       # Process an actual dependency
       string(TOUPPER ${_dep} _DEP)
       set(COMPONENTS)
-      set(COMPONENTS_AS_NON_REQUIRED)
-      
+      set(COMPONENTS_NOT_REQUIRED)
+
       # If the dependency has declared components take them into account
       if(${NAME}_${_DEP}_COMPONENTS)
-        set(COMPONENTS_AS_NON_REQUIRED " COMPONENTS ${${NAME}_${_DEP}_COMPONENTS}")
+        set(COMPONENTS_NOT_REQUIRED " COMPONENTS ${${NAME}_${_DEP}_COMPONENTS}")
         if(DEPMODE)
           set(COMPONENTS " ${${NAME}_${_DEP}_COMPONENTS}")
         else()
@@ -123,7 +123,7 @@ set(FIND_REQUIRED_FAILED)")
         list(APPEND _deps ${_dep})
         set(DEFDEP "${NAME}_USE_${_DEP}")
         string(REGEX REPLACE "-" "_" DEFDEP ${DEFDEP})
-        
+
         # Take into accout whether there is a version required or not
         if (${_DEP}_PACKAGE_VERSION)
             set(pkg_command "pkg_check_modules(${_dep} ${_dep}>=${${_DEP}_PACKAGE_VERSION})\n")
@@ -133,20 +133,22 @@ set(FIND_REQUIRED_FAILED)")
 
         # Try to find the dependency
         file(APPEND ${_fpIn}
-          "find_package(${_dep} ${${_DEP}_PACKAGE_VERSION}${${_DEP}_FIND_ARGS}${COMPONENTS_AS_NON_REQUIRED})\n"
-          "if ((NOT ${_dep}_FOUND) AND (NOT ${_DEP}_FOUND))\n"
-          "    message(STATUS \"Could not find ${_dep} using find_package\")\n"
+          "if(PKG_CONFIG_FOUND)\n"
+          "  find_package(${_dep} ${${_DEP}_PACKAGE_VERSION}${${_DEP}_FIND_ARGS}${COMPONENTS_NOT_REQUIRED})\n"
+          "  if((NOT ${_dep}_FOUND) AND (NOT ${_DEP}_FOUND))\n"
           "    ${pkg_command}\n"
-          "    if ((NOT ${_dep}_FOUND) AND (NOT ${_DEP}_FOUND))\n")
+          "  endif()\n")
         if(DEPMODE STREQUAL " REQUIRED")
-            set(MESSAGE_TYPE "FATAL_ERROR")
-        else()
-            set(MESSAGE_TYPE "STATUS")
+          file(APPEND ${_fpIn}
+            "  if((NOT ${_dep}_FOUND) AND (NOT ${_DEP}_FOUND))\n"
+            "    message(FATAL_ERROR \"Could not find ${_dep}\")\n"
+            "  endif()\n\n")
         endif()
         file(APPEND ${_fpIn}
-          "         message(${MESSAGE_TYPE} \"Could not find dependency ${_dep}\")\n"
-          "    endif()\n"
+          "else()\n"
+          "  find_package(${_dep} ${${_DEP}_PACKAGE_VERSION} ${${_DEP}_FIND_ARGS}${DEPMODE}${COMPONENTS})\n"
           "endif()\n\n")
+
         if(DEPMODE STREQUAL " REQUIRED")
           if(COMPONENTS)
             set(COMPONENTS " COMPONENTS${COMPONENTS}")
