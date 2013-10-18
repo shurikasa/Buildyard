@@ -127,9 +127,9 @@ set(FIND_REQUIRED_FAILED)")
 
         # Take into accout whether there is a version required or not
         if (${_DEP}_PACKAGE_VERSION)
-            set(pkg_command "pkg_check_modules(${_dep} ${_dep}>=${${_DEP}_PACKAGE_VERSION})\n")
+            set(pkg_command "pkg_check_modules(${_dep} ${_dep}>=${${_DEP}_PACKAGE_VERSION})")
         else()
-            set(pkg_command "pkg_check_modules(${_dep} ${_dep})\n")
+            set(pkg_command "pkg_check_modules(${_dep} ${_dep})")
         endif()
 
         # Try to find the dependency
@@ -143,7 +143,7 @@ set(FIND_REQUIRED_FAILED)")
           file(APPEND ${_fpIn}
             "  if((NOT ${_dep}_FOUND) AND (NOT ${_DEP}_FOUND))\n"
             "    message(FATAL_ERROR \"Could not find ${_dep}\")\n"
-            "  endif()\n\n")
+            "  endif()\n")
         endif()
         file(APPEND ${_fpIn}
           "else()\n"
