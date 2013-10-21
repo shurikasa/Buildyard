@@ -1,5 +1,5 @@
 
-set(TCLAP_PACKAGE_VERSION 1.3)
+set(TCLAP_PACKAGE_VERSION 1.2)
 set(TCLAP_OPTIONAL ON)
 set(TCLAP_REPO_URL https://github.com/BlueBrain/tclap.git)
 set(TCLAP_REPO_TAG bbp)
