@@ -13,6 +13,8 @@ else()
   find_program(TAR_EXE tar)
 endif()
 
+set(INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install")
+
 find_program(AUTORECONF_EXE autoreconf)
 if(NOT MSVC AND NOT AUTORECONF_EXE)
   if(APPLE)
