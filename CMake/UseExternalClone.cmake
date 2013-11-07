@@ -8,7 +8,7 @@ function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git
   string(TOUPPER ${name} NAME)
   set(TAIL_REVISION ${${NAME}_TAIL_REVISION})
   if(TAIL_REVISION)
-      set(TAIL_REVISION_CMD "-r"${TAIL_REVISION})
+      set(TAIL_REVISION_CMD "-r${TAIL_REVISION}")
   endif(TAIL_REVISION)
 
   file(WRITE ${script_filename}
