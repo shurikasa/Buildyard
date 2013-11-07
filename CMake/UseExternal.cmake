@@ -1,10 +1,13 @@
 
 # Copyright (c) 2012-2013 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 
+find_package(Git REQUIRED)
+find_package(PkgConfig)
+find_package(Subversion)
+
 include(SCM)
 include(ExternalProject)
 include(CMakeParseArguments)
-find_package(Git REQUIRED)
 include(UseExternalClone)
 include(UseExternalMakefile)
 include(UseExternalDeps)
@@ -22,14 +25,15 @@ foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   set_target_properties(${subtarget}s PROPERTIES FOLDER "00_Meta")
 endforeach()
 add_custom_target(AllProjects)
-add_custom_target(buildall)
-add_dependencies(updates update)
 set_target_properties(AllProjects PROPERTIES FOLDER "00_Main")
+add_custom_target(AllBuild)
+set_target_properties(AllBuild PROPERTIES FOLDER "00_Main")
+add_dependencies(updates update)
 
 add_custom_target(Buildyard-stat
   COMMAND ${GIT_EXECUTABLE} status -s --untracked-files=no
   COMMENT "Buildyard Status:"
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   )
 set_target_properties(Buildyard-stat PROPERTIES EXCLUDE_FROM_ALL ON)
 add_dependencies(stats Buildyard-stat)
@@ -128,7 +132,7 @@ function(USE_EXTERNAL name)
   set(SHORT_ROOT ${SHORT_NAME}_ROOT)
   set(SHORT_ENVROOT $ENV{${SHORT_ROOT}})
   if(NOT ${NAME}_SOURCE)
-    set(${NAME}_SOURCE "${CMAKE_SOURCE_DIR}/src/${name}")
+    set(${NAME}_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/${name}")
   endif()
 
   # CMake module search path
@@ -150,27 +154,33 @@ function(USE_EXTERNAL name)
   list(APPEND CMAKE_MODULE_PATH /usr/local/share/${name}/CMake)
 
   # try find_package
-  set(USE_EXTERNAL_INDENT "${USE_EXTERNAL_INDENT}  ")
   if(NOT ${NAME}_FORCE_BUILD)
     if(USE_EXTERNAL_COMPONENTS)
       string(REGEX REPLACE  " " ";" USE_EXTERNAL_COMPONENTS
         ${USE_EXTERNAL_COMPONENTS})
-      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET
+      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET ${${NAME}_FIND_ARGS}
         COMPONENTS ${USE_EXTERNAL_COMPONENTS})
     else()
-      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET)
+      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET
+        ${${NAME}_FIND_ARGS})
     endif()
   endif()
   if(${NAME}_FOUND)
     set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
   endif()
+  if(NOT ${name}_FOUND) # try pkg-config
+    if(PKG_CONFIG_EXECUTABLE)
+      if(${NAME}_PACKAGE_VERSION)
+        pkg_check_modules(${NAME} QUIET ${name}>=${${NAME}_PACKAGE_VERSION})
+      else()
+        pkg_check_modules(${NAME} QUIET ${name})
+      endif()
+      if(${NAME}_FOUND)
+        set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
+      endif()
+    endif()
+  endif()
   if(${name}_FOUND)
-#    if(NOT "${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}" STREQUAL "")
-#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: ${${NAME}_VERSION} "
-#        "installed in ${${NAME}_INCLUDE_DIRS}${${name}_INCLUDE_DIRS}")
-#    else()
-#      message(STATUS "${USE_EXTERNAL_INDENT}${name}: found")
-#    endif()
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
     set(USING ${USING} ${name} PARENT_SCOPE)
@@ -178,21 +188,20 @@ function(USE_EXTERNAL name)
   endif()
 
   unset(${name}_INCLUDE_DIR CACHE)  # some find_package (boost) don't properly
-  unset(${NAME}_INCLUDE_DIR CACHE)  # unset and recheck the version on subsequent
-  unset(${name}_INCLUDE_DIRS CACHE) # runs if it failed
+  unset(${NAME}_INCLUDE_DIR CACHE)  # unset and recheck the version on
+  unset(${name}_INCLUDE_DIRS CACHE) # subsequent runs if it failed
   unset(${NAME}_INCLUDE_DIRS CACHE)
   unset(${name}_LIBRARY_DIRS CACHE)
   unset(${NAME}_LIBRARY_DIRS CACHE)
 
-  if("${${NAME}_REPO_URL}" STREQUAL "")
+  if(NOT ${NAME}_REPO_URL)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
+    message(STATUS "Skip ${name}: No source repository configured")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
+      "Skip ${name}: No source repository configured\n")
     set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
     return()
   endif()
-
-#  message(STATUS   # print first for nicer output
-#    "${USE_EXTERNAL_INDENT}${name}: use ${${NAME}_REPO_URL}:${${NAME}_REPO_TAG}#"
-#    )
 
   # pull in dependent projects first
   add_custom_target(${name}-projects)
@@ -228,6 +237,8 @@ function(USE_EXTERNAL name)
   endforeach()
   if(MISSING)
     message(STATUS "Skip ${name}: missing${MISSING}")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
+      "Skip ${name}: missing${MISSING}\n")
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
     set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
     return()
@@ -240,12 +251,12 @@ function(USE_EXTERNAL name)
     set(REPO_TYPE git)
   endif()
   string(TOUPPER ${REPO_TYPE} REPO_TYPE)
-  set(DOWNLOAD_CMD ${REPO_TYPE}_REPOSITORY)
+  set(REPOSITORY ${REPO_TYPE}_REPOSITORY)
   if(REPO_TYPE STREQUAL "GIT-SVN")
     set(REPO_TYPE GIT)
     set(REPO_TAG GIT_TAG)
     set(GIT_SVN "svn")
-    set(DOWNLOAD_CMD ${REPO_TYPE}_REPOSITORY)
+    set(REPOSITORY ${REPO_TYPE}_REPOSITORY)
     # svn rebase fails with local modifications, ignore
     set(UPDATE_CMD ${GIT_EXECUTABLE} svn rebase || ${GIT_EXECUTABLE} status
       ALWAYS TRUE)
@@ -254,9 +265,8 @@ function(USE_EXTERNAL name)
     set(REPO_ORIGIN_URL ${${NAME}_REPO_URL})
     set(REPO_USER_URL ${${NAME}_USER_URL})
     set(REPO_ORIGIN_NAME ${${NAME}_ORIGIN_NAME})
-    set(REPO_TAG_VALUE ${${NAME}_REPO_TAG})
-    if(NOT REPO_TAG_VALUE)
-      set(REPO_TAG_VALUE "master")
+    if(NOT ${NAME}_REPO_TAG)
+      set(${NAME}_REPO_TAG "master")
     endif()
     if(NOT REPO_ORIGIN_NAME)
       if(REPO_ORIGIN_URL AND REPO_USER_URL)
@@ -266,18 +276,35 @@ function(USE_EXTERNAL name)
       endif()
     endif()
     # pull fails if tag is a SHA hash, use git status to set exit value to true
-    set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${REPO_TAG_VALUE} || ${GIT_EXECUTABLE} status
+    set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${${NAME}_REPO_TAG} || ${GIT_EXECUTABLE} status
         ALWAYS TRUE)
   elseif(REPO_TYPE STREQUAL "SVN")
-    find_package(Subversion REQUIRED)
+    if(NOT SUBVERSION_FOUND)
+      message(STATUS "Skip ${name}: missing subversion")
+      file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
+        "Skip ${name}: missing subversion\n")
+      set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
+      set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
+      return()
+    endif()
     set(REPO_TAG SVN_REVISION)
   elseif(REPO_TYPE STREQUAL "FILE")
-    set(DOWNLOAD_CMD URL)
+    set(REPOSITORY URL)
   else()
     message(FATAL_ERROR "Unknown repository type ${REPO_TYPE}")
   endif()
+  if(${NAME}_AUTOCONF)
+    if(NOT AUTORECONF_EXE)
+      message(STATUS "Skip ${name}: missing autoconf")
+      file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
+        "Skip ${name}: missing autoconf\n")
+      set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
+      set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
+      return()
+    endif()
+    set(${NAME}_EXTRA ${${NAME}_EXTRA} CONFIGURE_COMMAND ${CMAKE_COMMAND} -P ${name}_configure_cmd.cmake)
+  endif()
 
-  set(INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install")
   list(APPEND CMAKE_PREFIX_PATH ${INSTALL_PATH})
   set(ARGS -DBUILDYARD:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
            -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_PATH}
@@ -300,7 +327,7 @@ function(USE_EXTERNAL name)
     SOURCE_DIR "${${NAME}_SOURCE}"
     INSTALL_DIR "${INSTALL_PATH}"
     DEPENDS "${DEPENDS}"
-    ${DOWNLOAD_CMD} ${${NAME}_REPO_URL}
+    ${REPOSITORY} ${${NAME}_REPO_URL}
     ${REPO_TAG} ${${NAME}_REPO_TAG}
     UPDATE_COMMAND ${UPDATE_CMD}
     CMAKE_ARGS ${ARGS}
@@ -308,6 +335,8 @@ function(USE_EXTERNAL name)
     ${${NAME}_EXTRA}
     STEP_TARGETS ${USE_EXTERNAL_SUBTARGETS}
    )
+  set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL ON)
+
   use_external_buildonly(${name})
   file(APPEND ${CMAKE_BINARY_DIR}/projects.make
     "${name}-%:\n"
@@ -373,6 +402,7 @@ function(USE_EXTERNAL name)
     )
   set_target_properties(${name}-stat PROPERTIES EXCLUDE_FROM_ALL ON)
   set_target_properties(${name}-stat PROPERTIES FOLDER ${name})
+  add_dependencies(stats ${name}-stat)
 
   add_custom_target(${name}-reset
     COMMAND ${SCM_UNSTAGE}
@@ -423,19 +453,18 @@ function(USE_EXTERNAL name)
   set_target_properties(${name}-deps PROPERTIES EXCLUDE_FROM_ALL ON)
 
   # disable tests if requested
-  if(${${NAME}_NOTEST})
+  if(${NAME}_NOTEST)
     set(${NAME}_NOTESTONLY ON)
   endif()
 
-  # make optional if requested
-  if(${${NAME}_OPTIONAL})
-    set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL ON)
-    foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
-      set_target_properties(${name}-${subtarget} PROPERTIES EXCLUDE_FROM_ALL ON)
-    endforeach()
-    add_dependencies(stats ${name}-stat)
-  else()
-    # add to meta sub-targets
+  foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
+    set_target_properties(${name}-${subtarget} PROPERTIES EXCLUDE_FROM_ALL ON)
+  endforeach()
+
+  if(${NAME}_OPTIONAL)
+    set_target_properties(${name} PROPERTIES _EP_IS_OPTIONAL_PROJECT ON)
+    get_target_property(_optional ${name} _EP_IS_OPTIONAL_PROJECT)
+  else() # add non-optional sub-targets to meta sub-targets
     foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
       string(TOUPPER ${subtarget} UPPER_SUBTARGET)
       if(NOT ${NAME}_NO${UPPER_SUBTARGET})
@@ -443,7 +472,7 @@ function(USE_EXTERNAL name)
       endif()
     endforeach()
     add_dependencies(AllProjects ${name})
-    add_dependencies(buildall ${name}-buildall)
+    add_dependencies(AllBuild ${name}-buildall)
   endif()
 
   set_target_properties(${name} PROPERTIES FOLDER "00_Main")

@@ -2,6 +2,7 @@
 find_program(DOT_EXECUTABLE dot)
 find_program(TRED_EXECUTABLE tred)
 add_custom_target(pngs)
+set_target_properties(pngs PROPERTIES EXCLUDE_FROM_ALL ON)
 
 function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
   string(TOUPPER ${name} NAME)
@@ -61,7 +62,7 @@ function(CREATE_DEPENDENCY_GRAPH SRC DST GRP name)
         ${CMAKE_CURRENT_BINARY_DIR}/${name}_tred.dot
       DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${name}_tred.dot ${GRP}
       )
-    add_custom_target(${name}-png ALL DEPENDS ${DST}/${name}.png)
+    add_custom_target(${name}-png DEPENDS ${DST}/${name}.png)
     add_dependencies(pngs ${name}-png)
  endif()
 endfunction()
@@ -81,7 +82,7 @@ function(CREATE_DEPENDENCY_GRAPH_END SRC DST GRP)
       ${CMAKE_CURRENT_BINARY_DIR}/${dir}_tred.dot
       DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${dir}_tred.dot ${GRP}
       )
-    add_custom_target(${dir}_png ALL DEPENDS ${DST}/all.png)
+    add_custom_target(${dir}_png DEPENDS ${DST}/all.png)
     add_dependencies(pngs ${dir}_png)
   endif()
 endfunction()

@@ -28,6 +28,9 @@ usual. This solution will build the (pre-configured) project without
 considering any dependencies. Use the [build]/Buildyard.sln target to
 build a project considering all dependencies.
 
+It is highly recommended to install a precompiled boost version using
+the installers provided by BoostPro.
+
 ### Others
 
 Execute 'make' or 'make [Project]', which invokes cmake and builds debug
@@ -73,7 +76,7 @@ configuration file, for example
 [Equalizer.cmake](https://github.com/Eyescale/config/blob/master/Equalizer.cmake).
 It contains the following variables:
 
-* NAME\_VERSION: the required version of the project
+* NAME\_VERSION: the required version of the project.
 * NAME\_DEPENDS: list of dependencies, OPTIONAL and REQUIRED keywords
   are recognized. Projects with missing required dependencies will not
   be configured.
@@ -85,8 +88,12 @@ It contains the following variables:
   as required by the project find script. Default is NAME\_ROOT.
 * NAME\_TAIL\_REVISION: The oldest revision a git-svn repository should
   be cloned with.
-* NAME\_CMAKE\_ARGS Additional CMake arguments for the configure
+* NAME\_CMAKE\_ARGS: Additional CMake arguments for the configure
   step. The character '!' can be used to separate list items.
+* NAME\_AUTOCONF: when set to true, the autoconf build system is used to
+  build the project.
+* NAME\_DEB\_DEPENDS: Debian package names of dependencies. Used for
+  apt-get target and Travis CI configuration files.
 
 ## Extending
 
@@ -118,6 +125,11 @@ of the project, causing the project to be always build from source.
 
 Below are the targets in addition to the standard targets of
 ExternalProject.cmake:
+
+### NAME-buildall
+
+Builds the given project and all its dependencies w/o performing download and update step for each project.
+This requires successful bootstrapping of each project.
 
 ### NAME-buildonly
 
@@ -152,6 +164,14 @@ directory, and updates project when called from project source
 directory.
 
 ## Tips and Tricks
+
+### Bootstrapping from project source
+
+Buildyard does configure the project so it can self-bootstrap. This
+requires the
+[CMake subtree](https://github.com/Eyescale/CMake/blob/master/README.md)
+in the project and the setup described in
+[CMake/Buildyard.cmake](https://github.com/Eyescale/CMake/blob/master/README.md).
 
 ### Macports files
 

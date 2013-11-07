@@ -1,8 +1,10 @@
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 # Does a use_external(..) for each config*/*.cmake project.
 
+include(Common)
 include(UseExternal)
 include(CreateDependencyGraph)
+include(GitExternal)
 include(GitTargets)
 
 if(APPLE)
@@ -11,16 +13,19 @@ else()
   find_program(TAR_EXE tar)
 endif()
 
+set(INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install")
+
 find_program(AUTORECONF_EXE autoreconf)
 if(NOT MSVC AND NOT AUTORECONF_EXE)
   if(APPLE)
-    message(FATAL_ERROR
+    message(STATUS
       "autoreconf missing, install autoconf tools (sudo port install autoconf)")
   else()
-    message(FATAL_ERROR "autoreconf missing, install autoconf tools")
+    message(STATUS "autoreconf missing, install autoconf tools")
   endif()
 endif()
 
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "message(\"\n")
 macro(READ_CONFIG_DIR DIR)
   get_property(READ_CONFIG_DIR_DONE GLOBAL PROPERTY READ_CONFIG_DIR_${DIR})
   if(NOT READ_CONFIG_DIR_DONE)
@@ -50,34 +55,15 @@ macro(READ_CONFIG_DIR DIR)
       list(REMOVE_AT READ_CONFIG_DIR_DEPENDS 0 1 2)
       list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
       set(READ_CONFIG_DIR_DEPENDS_DIR
-        "${CMAKE_SOURCE_DIR}/${READ_CONFIG_DIR_DEPENDS_DIR}")
+        "${CMAKE_CURRENT_SOURCE_DIR}/${READ_CONFIG_DIR_DEPENDS_DIR}")
 
       message(STATUS
         "Using ${READ_CONFIG_DIR_DEPENDS_REPO}:${READ_CONFIG_DIR_DEPENDS_TAG}"
         " for ${READ_CONFIG_DIR_DEPENDS_DIR}")
-      if(NOT IS_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}")
-        execute_process(
-          COMMAND "${GIT_EXECUTABLE}" clone "${READ_CONFIG_DIR_DEPENDS_REPO}"
-            "${READ_CONFIG_DIR_DEPENDS_DIR}"
-          RESULT_VARIABLE nok ERROR_VARIABLE error
-          WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-        if(nok)
-          message(FATAL_ERROR
-            "${READ_CONFIG_DIR_DEPENDS_DIR} git clone failed: ${error}\n")
-        endif()
-      endif()
-      if(IS_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}/.git")
-        execute_process(
-          COMMAND "${GIT_EXECUTABLE}" pull
-          COMMAND "${GIT_EXECUTABLE}" checkout -q "${READ_CONFIG_DIR_DEPENDS_TAG}"
-          RESULT_VARIABLE nok ERROR_VARIABLE error
-          WORKING_DIRECTORY "${READ_CONFIG_DIR_DEPENDS_DIR}"
-          )
-        if(nok)
-          message(FATAL_ERROR
-            "${READ_CONFIG_DIR_DEPENDS_DIR} git update failed: ${error}\n")
-        endif()
-      endif()
+      git_external("${READ_CONFIG_DIR_DEPENDS_DIR}"
+        "${READ_CONFIG_DIR_DEPENDS_REPO}"
+        "${READ_CONFIG_DIR_DEPENDS_TAG}"
+        RESET .travis.yml)
       read_config_dir(${READ_CONFIG_DIR_DEPENDS_DIR})
     endwhile()
 
@@ -85,11 +71,12 @@ macro(READ_CONFIG_DIR DIR)
     set(_localFiles)
     if(EXISTS "${DIR}/depends.txt")
       set(_localFiles "${DIR}/depends.txt")
-      string(REPLACE "${CMAKE_SOURCE_DIR}/" "" _localFiles ${_localFiles})
+      string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _localFiles
+        ${_localFiles})
     endif()
     foreach(_config ${_files})
       include(${_config})
-      string(REPLACE "${CMAKE_SOURCE_DIR}/" "" _config ${_config})
+      string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _config ${_config})
       list(APPEND _localFiles ${_config})
     endforeach()
 
@@ -97,7 +84,7 @@ macro(READ_CONFIG_DIR DIR)
       string(REGEX REPLACE ".*\\.([a-zA-Z0-9]+)$" "\\1" DIRID ${DIR})
       if(NOT "${DIR}" STREQUAL "${DIRID}")
         add_custom_target(tarball-${DIRID}
-          COMMAND ${TAR_EXE} rf ${TARBALL} --transform 's:^:${CMAKE_PROJECT_NAME}-${VERSION}/:' -C "${CMAKE_SOURCE_DIR}" ${_localFiles}
+          COMMAND ${TAR_EXE} rf ${TARBALL} --transform 's:^:${CMAKE_PROJECT_NAME}-${VERSION}/:' -C "${CMAKE_CURRENT_SOURCE_DIR}" ${_localFiles}
           COMMENT "Adding ${DIRID}"
           DEPENDS tarball-${TARBALL_CHAIN})
         set(TARBALL_CHAIN ${DIRID})
@@ -107,7 +94,7 @@ macro(READ_CONFIG_DIR DIR)
 endmacro()
 
 set(_configs)
-file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
+file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
 
 list(LENGTH _dirs _dirs_num)
 if(_dirs_num LESS 2)
@@ -115,8 +102,8 @@ if(_dirs_num LESS 2)
   execute_process(
     COMMAND "${GIT_EXECUTABLE}" clone https://github.com/Eyescale/config.git
       config.eyescale
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-  file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+  file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
 endif()
 
 set(TARBALL_CHAIN create)
@@ -128,7 +115,7 @@ foreach(_dir ${_dirs})
   endif()
 endforeach()
 
-if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config.local)
+if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/config.local)
   message(STATUS "Reading overrides from config.local")
   file(GLOB _files "config.local/*.cmake")
   foreach(_config ${_files})
@@ -137,31 +124,31 @@ if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config.local)
 endif()
 
 set(_configs)
-if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/.git")
+if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
   if(BUILDYARD_REV)
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     add_custom_target(update)
   else()
     add_custom_target(update
       COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
       COMMENT "Updating Buildyard"
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
   endif()
 else()
   add_custom_target(update)
 endif()
-if(IS_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local/.git")
+if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config.local/.git")
   add_custom_target(config.local-update
     COMMAND ${GIT_EXECUTABLE} pull
     COMMENT "Updating config.local"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/config.local"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config.local"
     )
   add_dependencies(update config.local-update)
 endif()
 
-file(GLOB _dirs "${CMAKE_SOURCE_DIR}/config*")
+file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
 foreach(_dir ${_dirs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
     message(STATUS "Reading ${_dir}")
@@ -183,7 +170,8 @@ foreach(_dir ${_dirs})
         set(${_GROUP}_DOC_PROJECT "${_group}") # automagic doc project
       endif()
       if(${_GROUP}_DOC_PROJECT) # set in config.group/Buildyard.cmake
-        set(_dest "${CMAKE_SOURCE_DIR}/src/${${_GROUP}_DOC_PROJECT}/images")
+        set(_dest
+          "${CMAKE_CURRENT_SOURCE_DIR}/src/${${_GROUP}_DOC_PROJECT}/images")
       endif()
     endif()
 
@@ -227,6 +215,9 @@ if(NOT BOOST_FORCE_BUILD)
 endif()
 
 # configure projects
+if(BUILDYARD_TARGETS)
+  set(_configs ${BUILDYARD_TARGETS})
+endif()
 list(SORT _configs)
 foreach(_config ${_configs})
   string(TOUPPER ${_config} _CONFIG)
@@ -236,12 +227,12 @@ foreach(_config ${_configs})
 endforeach()
 
 if(DEBS)
-  list(REMOVE_DUPLICATES DEBS)
   list(SORT DEBS)
+  list(REMOVE_DUPLICATES DEBS)
 
   add_custom_target(apt-get
     COMMAND sudo apt-get install ${DEBS}
-    COMMENT "Running 'sudo apt-get install' for all dependencies:")
+    COMMENT "Running 'sudo apt-get install ${DEBS}':")
 endif()
 
 # generate Travis configs
@@ -262,53 +253,70 @@ foreach(_dir ${_dirs})
         "language: cpp\n"
         "# compiler: clang\n"
         "before_install:\n"
-        " - sudo apt-get update -qq\n"
-        " - sudo apt-get install -qq ")
+        " - sudo apt-get update -qq\n")
       foreach(_dep ${DEBS})
-        file(APPEND ${_dir}/.travis.yml "${_dep} ")
+        file(APPEND ${_dir}/.travis.yml
+          " - sudo apt-get install -qq ${_dep} || /bin/true\n")
       endforeach()
       file(APPEND ${_dir}/.travis.yml
-        "\nscript:\n"
+        "script:\n"
         " - git clone --depth 10 https://github.com/Eyescale/Buildyard.git\n"
         " - cd Buildyard\n"
-        " - git clone --depth 1 ${${_group}_CONFIGURL} ${_dirName}\n"
+        " - mkdir config.travis\n"
+        " - cp ../*.* config.travis\n"
+        " - env TRAVIS=1 make -j8 debug release\n"
         " - env TRAVIS=1 make tests\n")
     endif()
   endif()
 endforeach()
 
-# Output configured projects:
-message("")
+# Output configured projects and save for 'make info':
 if(SKIPPING)
   list(SORT SKIPPING)
-  set(TEXT "Skipping:\t")
+  set(TEXT "\nSkipping:    ")
   foreach(PROJECT ${SKIPPING})
     set(TEXT "${TEXT} ${PROJECT}")
   endforeach()
-  message(STATUS ${TEXT})
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "${TEXT}\n\n")
+  message("${TEXT}\n")
   set(SKIPPING)
 endif()
-message("")
 if(USING)
   list(SORT USING)
-  set(TEXT "Installed:\t")
+  set(TEXT "Installed:   ")
   foreach(PROJECT ${USING})
     set(TEXT "${TEXT} ${PROJECT}")
   endforeach()
-  message(STATUS ${TEXT})
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "${TEXT}\n\n")
+  message( "${TEXT}\n")
   set(USING)
 endif()
-message("")
 if(BUILDING)
+  list(APPEND BUILDING pngs)
   list(SORT BUILDING)
-  set(TEXT "Building:\t")
+  set(TEXT "Building:    ")
   foreach(PROJECT ${BUILDING})
-    set(TEXT "${TEXT} ${PROJECT}")
+    get_target_property(_optional ${PROJECT} _EP_IS_OPTIONAL_PROJECT)
+    if(NOT _optional)
+      set(TEXT "${TEXT} ${PROJECT}")
+    endif()
   endforeach()
-  message(STATUS ${TEXT})
-  set(BUILDING)
+  set(TEXT "${TEXT}\n              [")
+  foreach(PROJECT ${BUILDING})
+    get_target_property(_optional ${PROJECT} _EP_IS_OPTIONAL_PROJECT)
+    if(_optional)
+      set(TEXT "${TEXT} ${PROJECT}")
+    endif()
+  endforeach()
+  set(TEXT "${TEXT} ]")
+  file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "${TEXT}\n")
+  message( "${TEXT}\n")
 endif()
-message("")
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "\")")
+
+add_custom_target(info
+  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
+  COMMENT "Current Buildyard configuration:")
 
 if(TAR_EXE)
   add_dependencies(tarball DEPENDS tarball-${TARBALL_CHAIN})

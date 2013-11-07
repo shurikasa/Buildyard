@@ -1,8 +1,9 @@
-
-set(BOOST_PACKAGE_VERSION 1.41.0)
-set(BOOST_REPO_URL http://svn.boost.org/svn/boost/tags/release/Boost_1_53_0)
+# set(Boost_DEBUG TRUE)
+set(BOOST_PACKAGE_MINOR_VERSION 41)
+set(BOOST_PACKAGE_VERSION 1.${BOOST_PACKAGE_MINOR_VERSION}.0)
+set(BOOST_REPO_URL http://svn.boost.org/svn/boost/tags/release/Boost_1_54_0)
 set(BOOST_REPO_TYPE SVN)
-set(BOOST_SOURCE "${CMAKE_SOURCE_DIR}/src/Boost")
+set(BOOST_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/Boost")
 set(BOOST_OPTIONAL ON)
 set(BOOST_CMAKE_INCLUDE "SYSTEM")
 
@@ -21,9 +22,21 @@ if(MSVC)
   if(TOOLSET MATCHES "Win64")
     string(REGEX REPLACE "([0-9.]+) Win64" "\\1" TOOLSET ${TOOLSET})
     set(ADDRESS 64)
+    set(PROGRAM_PREFIX $ENV{PROGRAMW6432})
   else()
     set(ADDRESS 32)
+    set(PROGRAM_PREFIX $ENV{PROGRAMFILES})
   endif()
+
+  # Add default boost installation paths to search list
+  foreach(MINOR RANGE ${BOOST_PACKAGE_MINOR_VERSION} 70)
+    list(APPEND CMAKE_PREFIX_PATH "${PROGRAM_PREFIX}/boost/boost_1_${MINOR}")
+    foreach(PATCH RANGE 0 2)
+      list(APPEND CMAKE_PREFIX_PATH
+        "${PROGRAM_PREFIX}/boost/boost_1_${MINOR}_${PATCH}")
+    endforeach()
+  endforeach()
+
   set(BATFILE "${BOOST_SOURCE}/b3_${TOOLSET}.${ADDRESS}.bat")
   foreach(WITH_LIBRARY ${BOOST_BUILD_LIBRARIES})
     list(APPEND WITH_LIBRARIES " --with-${WITH_LIBRARY}")

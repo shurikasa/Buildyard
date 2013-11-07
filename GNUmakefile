@@ -1,5 +1,5 @@
 #!gmake
-.PHONY: debug release build clean clobber package tests
+.PHONY: debug release ninja build clean clobber package tests
 
 ifeq ($(wildcard Makefile), Makefile)
 all:
@@ -16,7 +16,7 @@ else
 BUILD ?= Build
 
 normal: $(BUILD)/Makefile
-	@$(MAKE) --no-print-directory -C $(BUILD) buildall pngs
+	@$(MAKE) --no-print-directory -C $(BUILD) AllBuild pngs
 
 build: $(BUILD)/Makefile
 	@$(MAKE) --no-print-directory -C $(BUILD)
@@ -35,7 +35,7 @@ tests: $(BUILD)/Makefile
 endif
 
 clobber:
-	rm -rf Debug Release Build
+	rm -rf Debug Release Build Ninja
 
 debug: Debug/Makefile
 	@$(MAKE) --no-print-directory -C Debug
@@ -44,12 +44,19 @@ Debug/Makefile:
 	@mkdir -p Debug
 	@cd Debug; cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-release: Release/Makefile
+release: Release/Makefile | debug
 	@$(MAKE) --no-print-directory -C Release
 
 Release/Makefile:
 	@mkdir -p Release
 	@cd Release; cmake .. -DCMAKE_BUILD_TYPE=Release
+
+ninja: Ninja/Makefile
+	ninja $(MAKECMDFLAGS) -C Ninja
+
+Ninja/Makefile:
+	@mkdir -p Ninja
+	@cd Ninja; cmake .. -DCMAKE_BUILD_TYPE=Debug -G Ninja
 
 %/Makefile:
 	@mkdir -p $*
