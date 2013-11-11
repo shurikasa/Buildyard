@@ -222,8 +222,9 @@ list(SORT _configs)
 foreach(_config ${_configs})
   string(TOUPPER ${_config} _CONFIG)
   use_external(${_config})
-  use_external_gather_debs(${_CONFIG})
+  use_external_gather_install(${_CONFIG})
   list(APPEND DEBS ${${_CONFIG}_DEBS})
+  list(APPEND PORTS ${${_CONFIG}_PORTS})
 endforeach()
 
 if(DEBS)
@@ -233,6 +234,19 @@ if(DEBS)
   add_custom_target(apt-get
     COMMAND sudo apt-get install ${DEBS}
     COMMENT "Running 'sudo apt-get install ${DEBS}':")
+endif()
+
+if(PORTS)
+  list(SORT PORTS)
+  list(REMOVE_DUPLICATES PORTS)
+  set(PORTS_UNIVERSAL)
+  foreach(PORT ${PORTS})
+    list(APPEND PORTS_UNIVERSAL ${PORT} +universal)
+  endforeach()
+
+  add_custom_target(port-get
+    COMMAND sudo port install ${PORTS_UNIVERSAL}
+    COMMENT "Running 'sudo port install ${PORTS} (+universal)':")
 endif()
 
 # generate Travis configs

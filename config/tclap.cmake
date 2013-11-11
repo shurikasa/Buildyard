@@ -2,6 +2,7 @@
 set(TCLAP_PACKAGE_VERSION 1.2)
 set(TCLAP_OPTIONAL ON)
 set(TCLAP_DEB_DEPENDS doxygen)
+set(TCLAP_PORT_DEPENDS doxygen)
 
 find_package(Doxygen QUIET)
 if(DOXYGEN_FOUND) # build depends on doxygen

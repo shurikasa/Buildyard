@@ -1,23 +1,30 @@
 
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
 
-function(USE_EXTERNAL_GATHER_DEBS NAME)
-  # sets ${NAME}_DEBS from all dependencies on return
+function(USE_EXTERNAL_GATHER_INSTALL NAME)
+  # sets ${NAME}_DEBS and ${NAME}_PORTS from all dependencies on return
   set(DEBS pkg-config git git-svn subversion cmake autoconf automake git-review
-    ninja-build)
+    ninja-build lcov)
 
   # recurse to get dependency roots
   foreach(proj ${${NAME}_DEPENDS})
     string(TOUPPER ${proj} PROJ)
-    use_external_gather_debs(${PROJ})
+    use_external_gather_install(${PROJ})
     list(APPEND DEBS ${${PROJ}_DEBS})
+    list(APPEND PORTS ${${PROJ}_PORTS})
   endforeach()
 
   list(APPEND DEBS ${${NAME}_DEB_DEPENDS})
+  list(APPEND PORTS ${${NAME}_PORT_DEPENDS})
   if(DEBS)
     list(REMOVE_DUPLICATES DEBS)
     list(SORT DEBS)
     set(${NAME}_DEBS ${DEBS} PARENT_SCOPE) # return value
+  endif()
+  if(PORTS)
+    list(REMOVE_DUPLICATES PORTS)
+    list(SORT PORTS)
+    set(${NAME}_PORTS ${PORTS} PARENT_SCOPE) # return value
   endif()
 endfunction()
 
@@ -65,13 +72,11 @@ function(USE_EXTERNAL_DEPS name)
     " - mkdir Debug\n"
     " - cd Debug\n"
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Debug\n"
-    " - make -j8\n"
-    " - make test ARGS=-V\n"
+    " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
     " - mkdir ../Release\n"
     " - cd ../Release\n"
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Release\n"
-    " - make -j8\n"
-    " - make test ARGS=-V\n"
+    " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
     "before_install:\n"
     " - sudo apt-get update -qq\n")
   file(WRITE ${_reqIn} "
@@ -183,7 +188,7 @@ endif()
     endif()
   endforeach()
 
-  use_external_gather_debs(${NAME})
+  use_external_gather_install(${NAME})
   foreach(_dep ${${NAME}_DEBS})
     file(APPEND ${_ciIn} " - sudo apt-get install -qq ${_dep} || /bin/true\n")
   endforeach()
