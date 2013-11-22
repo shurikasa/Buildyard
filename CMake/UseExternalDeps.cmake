@@ -31,7 +31,7 @@ endfunction()
 # write in-source FindPackages.cmake, .travis.yml
 function(USE_EXTERNAL_DEPS name)
   string(TOUPPER ${name} NAME)
-  if(${NAME}_SKIPFIND OR NOT ${NAME}_DEPENDS)
+  if(BUILDYARD_STOP OR ${NAME}_SKIPFIND OR NOT ${NAME}_DEPENDS)
     return()
   endif()
 
