@@ -126,42 +126,23 @@ of the project, causing the project to be always build from source.
 Below are the targets in addition to the standard targets of
 ExternalProject.cmake:
 
-### NAME-buildall
-
-Builds the given project and all its dependencies w/o performing download and update step for each project.
-This requires successful bootstrapping of each project.
-
-### NAME-buildonly
-
-Builds only the the given project without considering dependencies,
-update and configure steps.
-
-### NAME-projects
-
-Builds all non-optional dependees of the given project, useful for
-testing downstream projects after API changes.
-
-### NAME-deps
-
-Builds all dependencies of the given project.
-
-### NAME-doxygen
-
-Builds doxygen documentation of the given project.
-
-### NAME-reset
-
-Cleans all working changes in the project's source directory.
-
-### stats
-
-Runs 'SCM status' on all projects.
-
-### update
-
-Updates all Buildyard configurations when called from Buildyard source
-directory, and updates project when called from project source
-directory.
+* apt-get: sudo apt-get install all packages needed on Ubuntu.
+* port-get: sudo port install all MacPorts packages needed on Mac OS X.
+* NAME-buildall: Build the given project and all its dependencies w/o
+  performing download and update step for each project. Requires
+  successful bootstrapping of each project.
+* NAME-buildonly: Build only the given project without considering
+  dependencies, update and configure steps.
+* NAME-buildall: Build the given project and all dependencies without
+  considering dependencies, update and configure steps.
+* NAME-projects: Build all non-optional dependees of the given project,
+  useful for testing downstream projects after API changes.
+* NAME-doxygen: Build doxygen documentation of the given project.
+* NAME-reset: Cleans all working changes in the project's source directory.
+* stats: Runs 'SCM status' on all projects.
+* update: Update all Buildyard configurations when called from Buildyard
+  source directory, and updates project when called from project source
+  directory.
 
 ## Tips and Tricks
 

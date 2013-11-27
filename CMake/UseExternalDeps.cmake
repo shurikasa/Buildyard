@@ -31,7 +31,7 @@ endfunction()
 # write in-source FindPackages.cmake, .travis.yml
 function(USE_EXTERNAL_DEPS name)
   string(TOUPPER ${name} NAME)
-  if(${NAME}_SKIPFIND OR NOT ${NAME}_DEPENDS)
+  if(BUILDYARD_STOP OR ${NAME}_SKIPFIND OR NOT ${NAME}_DEPENDS)
     return()
   endif()
 
@@ -71,11 +71,11 @@ function(USE_EXTERNAL_DEPS name)
     "script:\n"
     " - mkdir Debug\n"
     " - cd Debug\n"
-    " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Debug\n"
+    " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Debug -DTRAVIS=1\n"
     " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
     " - mkdir ../Release\n"
     " - cd ../Release\n"
-    " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Release\n"
+    " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Release -DTRAVIS=1\n"
     " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
     "before_install:\n"
     " - sudo apt-get update -qq\n")
