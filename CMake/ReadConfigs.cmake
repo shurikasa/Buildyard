@@ -245,7 +245,7 @@ if(PORTS)
   endforeach()
 
   add_custom_target(port-get
-    COMMAND sudo port install ${PORTS_UNIVERSAL}
+    COMMAND sudo port install -p ${PORTS_UNIVERSAL}
     COMMENT "Running 'sudo port install ${PORTS} (+universal)':")
 endif()
 
