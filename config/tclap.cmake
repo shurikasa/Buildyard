@@ -1,6 +1,11 @@
 
 set(TCLAP_PACKAGE_VERSION 1.2)
 set(TCLAP_OPTIONAL ON)
+
+if(MSVC)
+  return()
+endif()
+
 set(TCLAP_DEB_DEPENDS doxygen)
 set(TCLAP_PORT_DEPENDS doxygen)
 
