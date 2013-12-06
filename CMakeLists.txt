@@ -1,5 +1,5 @@
 
-# Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
+# Copyright (c) 2012-2013 Stefan.Eilemann@epfl.ch
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(Buildyard)
@@ -9,9 +9,12 @@ set(VERSION_MINOR "9")
 set(VERSION_PATCH "0")
 set(RELEASE_VERSION 0) # OFF or ABI version
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake
+  ${CMAKE_SOURCE_DIR}/CMake/common)
 set(GITTARGETS_RELEASE_BRANCH current)
 
+include(.gitexternals)
 include(ReadConfigs)
 add_custom_target(default ALL)
 

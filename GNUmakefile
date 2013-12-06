@@ -1,5 +1,5 @@
 #!gmake
-.PHONY: debug release ninja build clean clobber package tests
+.PHONY: debug release ninja coverage build clean clobber package tests
 
 ifeq ($(wildcard Makefile), Makefile)
 all:
@@ -35,7 +35,7 @@ tests: $(BUILD)/Makefile
 endif
 
 clobber:
-	rm -rf Debug Release Build Ninja
+	rm -rf Debug Release Build Ninja Coverage
 
 debug: Debug/Makefile
 	@$(MAKE) --no-print-directory -C Debug
@@ -57,6 +57,13 @@ ninja: Ninja/Makefile
 Ninja/Makefile:
 	@mkdir -p Ninja
 	@cd Ninja; cmake .. -DCMAKE_BUILD_TYPE=Debug -G Ninja
+
+coverage: Coverage/Makefile
+	make $(MAKECMDFLAGS) -C Coverage tests
+
+Coverage/Makefile:
+	@mkdir -p Coverage
+	@cd Coverage; cmake .. -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE:STRING=ON
 
 %/Makefile:
 	@mkdir -p $*
