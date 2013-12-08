@@ -271,7 +271,8 @@ set(${NAME}_SOURCE \${CMAKE_SOURCE_DIR})")
     "config.${${NAME}_GROUP} ${${${NAME}_GROUP}_CONFIGURL} master")
 
   file(WRITE ${_scriptdir}/writeDeps.cmake "
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake
+  ${CMAKE_SOURCE_DIR}/CMake/common)
 include(UpdateFile)
 update_file(${_fpIn} ${_fpOut})
 update_file(${_ciIn} ${_ciOut})
