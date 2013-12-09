@@ -4,7 +4,7 @@
 function(USE_EXTERNAL_GATHER_INSTALL NAME)
   # sets ${NAME}_DEBS and ${NAME}_PORTS from all dependencies on return
   set(DEBS pkg-config git git-svn subversion cmake autoconf automake git-review
-    ninja-build lcov)
+    ninja-build lcov doxygen)
 
   # recurse to get dependency roots
   foreach(proj ${${NAME}_DEPENDS})
