@@ -74,6 +74,7 @@ function(USE_EXTERNAL_DEPS name)
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Debug -DTRAVIS=1\n"
     " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
     " - mkdir ../Release\n"
+    " - git status\n"
     " - cd ../Release\n"
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Release -DTRAVIS=1\n"
     " - env TRAVIS=1 make -j8 tests ARGS=-V\n"
