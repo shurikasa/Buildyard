@@ -139,6 +139,7 @@ ExternalProject.cmake:
   useful for testing downstream projects after API changes.
 * NAME-doxygen: Build doxygen documentation of the given project.
 * NAME-reset: Cleans all working changes in the project's source directory.
+* NAME-snapshot: Create one environment module including all dependencies
 * stats: Runs 'SCM status' on all projects.
 * update: Update all Buildyard configurations when called from Buildyard
   source directory, and updates project when called from project source
