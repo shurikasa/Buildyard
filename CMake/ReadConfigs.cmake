@@ -28,19 +28,11 @@ endif()
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "message(\"\n")
 macro(READ_CONFIG_DIR DIR)
   get_property(READ_CONFIG_DIR_DONE GLOBAL PROPERTY READ_CONFIG_DIR_${DIR})
-  if(NOT READ_CONFIG_DIR_DONE)
-    message(STATUS "Setting up ${DIR}")
-    set_property(GLOBAL PROPERTY READ_CONFIG_DIR_${DIR} ON)
+  if(NOT READ_CONFIG_DIR_DONE) # Not already parsed
+    set_property(GLOBAL PROPERTY READ_CONFIG_DIR_${DIR} ON) # mark being parsed
 
+    # Read all dependencies first
     set(READ_CONFIG_DIR_DEPENDS)
-    if(EXISTS ${DIR}/Buildyard.txt) # deprecated, use Buildyard.cmake
-      file(READ ${DIR}/Buildyard.txt BUILDYARD_REV)
-      string(REGEX REPLACE "\n" "" BUILDYARD_REV "${BUILDYARD_REV}")
-    endif()
-    if(EXISTS ${DIR}/Buildyard.cmake)
-      include(${DIR}/Buildyard.cmake)
-    endif()
-
     if(EXISTS ${DIR}/depends.txt)
       file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
       string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
@@ -67,6 +59,8 @@ macro(READ_CONFIG_DIR DIR)
       read_config_dir(${READ_CONFIG_DIR_DEPENDS_DIR})
     endwhile()
 
+    # Read configurations in this configuration folder
+    message(STATUS "Reading ${DIR}")
     file(GLOB _files "${DIR}/*.cmake")
     set(_localFiles)
     if(EXISTS "${DIR}/depends.txt")
@@ -74,6 +68,15 @@ macro(READ_CONFIG_DIR DIR)
       string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _localFiles
         ${_localFiles})
     endif()
+
+    if(EXISTS ${DIR}/Buildyard.txt) # deprecated, use Buildyard.cmake
+      file(READ ${DIR}/Buildyard.txt BUILDYARD_REV)
+      string(REGEX REPLACE "\n" "" BUILDYARD_REV "${BUILDYARD_REV}")
+    endif()
+    if(EXISTS ${DIR}/Buildyard.cmake)
+      include(${DIR}/Buildyard.cmake)
+    endif()
+
     foreach(_config ${_files})
       include(${_config})
       string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _config ${_config})
@@ -116,7 +119,7 @@ foreach(_dir ${_dirs})
 endforeach()
 
 if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/config.local)
-  message(STATUS "Reading overrides from config.local")
+  message(STATUS "Reading project overrides from config.local")
   file(GLOB _files "config.local/*.cmake")
   foreach(_config ${_files})
     include(${_config})
@@ -148,10 +151,10 @@ if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config.local/.git")
   add_dependencies(update config.local-update)
 endif()
 
+# Create targets for dependency graphs
 file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
 foreach(_dir ${_dirs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
-    message(STATUS "Reading ${_dir}")
     get_filename_component(_dirName ${_dir} NAME)
 
     set(_dest "${_dir}")
