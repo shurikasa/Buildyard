@@ -78,6 +78,23 @@ function(USE_EXTERNAL_BUILDONLY name)
     COMMENT "Building ${name}"
     WORKING_DIRECTORY ${binary_dir}
     )
+  # snapshot module for release builds
+  if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    add_custom_target(${name}-snapshot_install
+      COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${MODULE_SNAPSHOT_DIR} -P cmake_install.cmake
+      COMMENT "Installing snapshot of ${name}"
+      DEPENDS ${name}-buildonly
+      WORKING_DIRECTORY ${binary_dir}
+      )
+    add_custom_target(${name}-snapshot
+      COMMAND ${cmd} snapshot
+      COMMENT "Creating snapshot for ${name}"
+      WORKING_DIRECTORY ${binary_dir}
+      DEPENDS ${name}-snapshot_install
+    )
+    set_target_properties(${name}-snapshot_install PROPERTIES EXCLUDE_FROM_ALL ON)
+    set_target_properties(${name}-snapshot PROPERTIES EXCLUDE_FROM_ALL ON)
+  endif()
   set_target_properties(${name}-buildonly PROPERTIES EXCLUDE_FROM_ALL ON)
 endfunction()
 
@@ -305,6 +322,10 @@ function(USE_EXTERNAL name)
     set(${NAME}_EXTRA ${${NAME}_EXTRA} CONFIGURE_COMMAND ${CMAKE_COMMAND} -P ${name}_configure_cmd.cmake)
   endif()
 
+  if(NOT MODULE_SNAPSHOT_DIR)
+    set(MODULE_SNAPSHOT_DIR ${CMAKE_CURRENT_BINARY_DIR}/snapshot)
+  endif()
+
   list(APPEND CMAKE_PREFIX_PATH ${INSTALL_PATH})
   set(ARGS -DBUILDYARD:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
            -DENABLE_COVERAGE:STRING=${ENABLE_COVERAGE}
@@ -313,9 +334,10 @@ function(USE_EXTERNAL name)
            -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
            -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
            -DBoost_NO_BOOST_CMAKE=ON
-           -DMODULE_SW_BASEDIR:INTERNAL=${MODULE_SW_BASEDIR}
-           -DMODULE_MODULEFILES:INTERNAL=${MODULE_MODULEFILES}
-           -DMODULE_SW_CLASS:INTERNAL=${MODULE_SW_CLASS}
+           -DMODULE_SW_BASEDIR:INTERNAL=${MODULE_SW_BASEDIR}   # module info
+           -DMODULE_MODULEFILES:INTERNAL=${MODULE_MODULEFILES} # comes from
+           -DMODULE_SW_CLASS:INTERNAL=${MODULE_SW_CLASS}       # Buildyard.cmake
+           -DMODULE_SNAPSHOT_DIR:INTERNAL=${MODULE_SNAPSHOT_DIR}
             ${${NAME}_ARGS} ${${NAME}_CMAKE_ARGS})
   if(NOT Boost_FOUND)
     list(APPEND ARGS -DBoost_NO_SYSTEM_PATHS=ON)
@@ -443,6 +465,9 @@ function(USE_EXTERNAL name)
     if(_dep_check EQUAL 1)
       add_dependencies(${name}-resetall ${_dep}-resetall)
       add_dependencies(${name}-buildall ${_dep}-buildall)
+      if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+        add_dependencies(${name}-snapshot_install ${_dep}-snapshot_install)
+      endif()
       set_target_properties(${name}-resetall PROPERTIES FOLDER ${name})
     endif()
   endforeach()
