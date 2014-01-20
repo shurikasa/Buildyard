@@ -1,6 +1,8 @@
 # Buildyard
 
-## Introduction
+[Presentation.pdf](https://github.com/Eyescale/Buildyard/blob/master/doc/Presentation.pdf?raw=true)
+
+## Quick Start
 
 Buildyard facilitates the build and development of multiple, dependent
 projects from installed packages, git or svn repositories. The following
@@ -9,33 +11,29 @@ dotted bubbles, and optional dependencies linked using dotted arrows:
 
 ![Depency Graph](http://eyescale.github.com/images/all.png)
 
-## Presentation
-
-[Presentation.pdf](https://github.com/Eyescale/Buildyard/blob/master/doc/Presentation.pdf?raw=true)
-
-## Using
-
 ### Visual Studio
 
-Use cmake to build a Visual Studio Solution. Build this solution at
-least once to download and install all dependencies. Do not use
-'Build - Build Solution', but build the project 'ALL_BUILD' or
-'00_Main - AllProjects' instead. The solution contains sub-targets without
-proper dependencies, which will cause build failures.
+It is highly recommended to install a precompiled boost version using
+the installers provided by BoostPro.
+
+Use cmake to generate a Visual Studio Solution. Open this solution and
+build it at least once to download and install all dependencies. See
+'Targets' below for more details.
 
 For development, open [build]/[Project]/[Project].sln and work there as
 usual. This solution will build the (pre-configured) project without
 considering any dependencies. Use the [build]/Buildyard.sln target to
 build a project considering all dependencies.
 
-It is highly recommended to install a precompiled boost version using
-the installers provided by BoostPro.
-
 ### Others
 
-Execute 'make' or 'make [Project]', which invokes cmake and builds debug
-versions of all or the specified project. On Ubuntu, 'make apt-get'
-installs all known package dependencies.
+On Ubuntu, use 'make apt-get' to install all known package
+dependencies. On Mac OS X, use 'make port-get' to install all known
+MacPorts dependencies.
+
+Execute 'make build' or 'make [Project]' at least once, which downloads,
+configures and builds debug versions of all or the specified project. See
+'Targets' below for more details.
 
 For development, cd into src/[Project] and work there as usual. The
 default make target will build the (pre-configured) project without
@@ -46,7 +44,50 @@ Custom CMake binary directories are supported and can be used through
 the top-level make using 'make BUILD=[directory]' or 'export
 BUILD=[directory]; make'.
 
-## Directory Layout
+## How does it work?
+
+Buildyard uses simple configuration files grouped in per-organisation
+config.[org] folders, for example
+[config.eyescale](https://github.com/Eyescale/config). Simply clone the
+desired config repositories into the Buildyard directory.
+
+Each config folder may contain a depends.txt, which lists config folders
+this config folder depends on. This allows extending the base
+configuration with custom projects from other sources, e.g.,
+https://github.com/Eyescale/config/blob/master/depends.txt
+
+Each config folder contains project .cmake configuration files, for
+example
+[Equalizer.cmake](https://github.com/Eyescale/config/blob/master/Equalizer.cmake).
+It contains the following variables:
+
+* PROJECT\_VERSION: the required version of the project.
+* PROJECT\_DEPENDS: list of dependencies, OPTIONAL and REQUIRED keywords
+  are recognized. Projects with missing required dependencies will not
+  be configured.
+* PROJECT\_DEPENDEE\_COMPONENTS: list of COMPONENTS for find_package.
+* PROJECT\_REPO\_TYPE: optional, git, git-svn or svn. Default is git.
+* PROJECT\_REPO\_URL: git or svn repository URL.
+* PROJECT\_REPO\_TAG: The svn revision or git tag to use to build the project.
+* PROJECT\_ROOT\_VAR: optional CMake variable name for the project root,
+  as required by the project find script. Default is PROJECT\_ROOT.
+* PROJECT\_TAIL\_REVISION: The oldest revision a git-svn repository should
+  be cloned with.
+* PROJECT\_CMAKE\_ARGS: Additional CMake arguments for the configure
+  step. The character '!' can be used to separate list items.
+* PROJECT\_AUTOCONF: when set to true, the autoconf build system is used to
+  build the project.
+* PROJECT\_DEB\_DEPENDS: Debian package names of dependencies. Used for
+  apt-get target and Travis CI configuration files.
+* PROJECT\_PORT\_DEPENDS: MacPorts package names of dependencies. Used
+  for port-get target.
+
+The Buildyard CMakeLists pulls in all dependent config folders, reads
+all .cmake files from the config* directories, and configures each
+project using
+[ExternalProject.cmake](http://www.kitware.com/media/html/BuildingExternalProjectsWithCMake2.8.html).
+
+### Directory Layout
 
 * config/ : The builtin configuration files
 * config.[name] : a configuration module, e.g.,
@@ -57,93 +98,80 @@ BUILD=[directory]; make'.
   Dependencies will be cloned by Buildyard automatically.
 * config.[name]/[Project].cmake : A project configuration file (see
   Configuration)
-* Build/ : The build directory where all generated files land.
-* Build/[Project] : The project build directory, including binaries
+* Build/ : The build directory where all generated files end up.
+* Build/[Project] : The per-project build directory, including binaries
 * Release/... : Same as build, but for a 'make release' build
 * src/ : The directories into which all project sources are cloned
 * src/[Project] : The source directory for the project. You can work
   from here, since a Makefile is generated by Buildyard for you (see Using).
 
-## Configuration
-
-Configurations are grouped in a per-organisation config.[org] folder,
-for example [config.eyescale](https://github.com/Eyescale/config).
-Simply clone these repositories into the Buildyard directory.
-
-The ExternalProject CMake module is the foundation for a simplified
-per-project configuration file. Each project has a config*/name.cmake
-configuration file, for example
-[Equalizer.cmake](https://github.com/Eyescale/config/blob/master/Equalizer.cmake).
-It contains the following variables:
-
-* NAME\_VERSION: the required version of the project.
-* NAME\_DEPENDS: list of dependencies, OPTIONAL and REQUIRED keywords
-  are recognized. Projects with missing required dependencies will not
-  be configured.
-* NAME\_DEPENDEE\_COMPONENTS: list of COMPONENTS for find_package.
-* NAME\_REPO\_TYPE: optional, git, git-svn or svn. Default is git.
-* NAME\_REPO\_URL: git or svn repository URL.
-* NAME\_REPO\_TAG: The svn revision or git tag to use to build the project
-* NAME\_ROOT\_VAR: optional CMake variable name for the project root,
-  as required by the project find script. Default is NAME\_ROOT.
-* NAME\_TAIL\_REVISION: The oldest revision a git-svn repository should
-  be cloned with.
-* NAME\_CMAKE\_ARGS: Additional CMake arguments for the configure
-  step. The character '!' can be used to separate list items.
-* NAME\_AUTOCONF: when set to true, the autoconf build system is used to
-  build the project.
-* NAME\_DEB\_DEPENDS: Debian package names of dependencies. Used for
-  apt-get target and Travis CI configuration files.
-
-## Extending
-
-The top-level CMakeLists reads all .cmake files from all config*
-directories, and use them as a project. This allows extending the base
-configuration with custom projects from other sources. A depends.txt
-file can be used to automatically pull in other configuration folders,
-e.g.: https://github.com/Eyescale/config/blob/master/depends.txt
-
-
 ## Options
 ### Local overrides
 
-For customizing the shipped configurations one can override and extend those
-configurations with a config.local/name.cmake configuration. Additional options
-are available there to specify a user fork for instance. Note that this options
-are only valid for git repositories:
+For customizing the shipped configurations one can override and extend
+those configurations with a config.local configuration folder, e.g.,
+[eile's config.local](https://github.com/eile/config.local). Additional
+options are available there to specify a user fork for instance. Note
+that this options are only valid for git repositories:
 
-* NAME\_USER\_URL: the URL of the new origin for the project
-* NAME\_ORIGIN\_NAME: the new remote name of the original origin
+* PROJECT\_USER\_URL: the URL of the new origin for the project
+* PROJECT\_ORIGIN\_NAME: the new remote name of the original origin
   (optional, default 'root')
 
 ### Force build from source
 
-Setting NAME\_FORCE\_BUILD to ON will disable finding installed versions
+Setting PROJECT\_FORCE\_BUILD to ON will disable finding installed versions
 of the project, causing the project to be always build from source.
 
 ## Targets
 
-Below are the targets in addition to the standard targets of
-ExternalProject.cmake:
+### Generic Targets
 
-* apt-get: sudo apt-get install all packages needed on Ubuntu.
-* port-get: sudo port install all MacPorts packages needed on Mac OS X.
-* NAME-buildall: Build the given project and all its dependencies w/o
-  performing download and update step for each project. Requires
-  successful bootstrapping of each project.
-* NAME-buildonly: Build only the given project without considering
-  dependencies, update and configure steps.
-* NAME-buildall: Build the given project and all dependencies without
-  considering dependencies, update and configure steps.
-* NAME-projects: Build all non-optional dependees of the given project,
-  useful for testing downstream projects after API changes.
-* NAME-doxygen: Build doxygen documentation of the given project.
-* NAME-reset: Cleans all working changes in the project's source directory.
-* NAME-snapshot: Create one environment module including all dependencies
-* stats: Runs 'SCM status' on all projects.
+The per-project targets below are also available as aggregate targets
+for all projects, e.g., 'makes' builds all projects.
+
+* apt-get: 'sudo apt-get install' all packages needed on Ubuntu.
+* port-get: 'sudo port install' all MacPorts packages needed on Mac OS X.
 * update: Update all Buildyard configurations when called from Buildyard
   source directory, and updates project when called from project source
   directory.
+
+### Per-Project Targets
+
+* PROJECT: downloads, configures and build the project and all its
+  dependencies. Typically only used in the beginning to bootstrap
+* PROJECT-only: Build only the given project without considering
+  dependencies, update and configure steps. This is the recommended way
+  to rebuild a project in a bootstrapped Buildyard instance.
+* PROJECT-make: Build the given project and all its dependencies without
+  considering the update and configure steps. This is the recommended
+  way to rebuild a project and all its dependencies in a bootstrapped
+  Buildyard instance.
+* PROJECT-projects: Build all non-optional dependees of the given project,
+  useful for testing downstream projects after API changes.
+* PROJECT-snapshot: Create one environment module including all
+  dependencies (Release builds only)
+* PROJECT-reset: Cleans all working changes in the project's source directory.
+* PROJECT-stat: Run 'SCM status' on the project.
+
+In addition, the targets created by ExternalProject.cmake (download,
+update, configure, build and install) are also available, but are not
+really useful in the context of Buildyard.
+
+### In-source Targets
+
+Buildyard will set up a Makefile in src/Project, if it safe to do
+so. This Makefile forwards to build/Project and allows to build all
+targets defined by the project. It also provides the following,
+additional targets:
+
+* default: Build this project only, equivalent to PROJECT-only in the
+  build directory
+* all: Build this project and all dependencies, equivalent to
+  PROJECT-make in the build directory
+* configure: Reconfigure this project using cmake, equivalent to 'cmake
+  Build/PROJECT'
+
 
 ## Tips and Tricks
 

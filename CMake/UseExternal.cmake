@@ -1,5 +1,5 @@
 
-# Copyright (c) 2012-2013 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
+# Copyright (c) 2012-2014 Stefan.Eilemann@epfl.ch
 
 find_package(Git REQUIRED)
 find_package(PkgConfig)
@@ -17,17 +17,14 @@ include(LSBInfo)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
 
-set(USE_EXTERNAL_SUBTARGETS update build buildall buildonly configure test
-  testonly install package download deps Makefile stat clean reset resetall
-  projects bootstrap module)
+set(USE_EXTERNAL_SUBTARGETS update make only configure test ci install download
+  Makefile stat clean reset resetall projects bootstrap)
 foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   add_custom_target(${subtarget}s)
   set_target_properties(${subtarget}s PROPERTIES FOLDER "00_Meta")
 endforeach()
-add_custom_target(AllProjects)
-set_target_properties(AllProjects PROPERTIES FOLDER "00_Main")
-add_custom_target(AllBuild)
-set_target_properties(AllBuild PROPERTIES FOLDER "00_Main")
+add_custom_target(build)
+set_target_properties(build PROPERTIES FOLDER "00_Main")
 add_dependencies(updates update)
 
 add_custom_target(Buildyard-stat
@@ -35,7 +32,8 @@ add_custom_target(Buildyard-stat
   COMMENT "Buildyard Status:"
   WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   )
-set_target_properties(Buildyard-stat PROPERTIES EXCLUDE_FROM_ALL ON)
+set_target_properties(Buildyard-stat
+  PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 add_dependencies(stats Buildyard-stat)
 
 # renames existing origin and adds user URL as new origin (git only)
@@ -43,8 +41,10 @@ function(USE_EXTERNAL_CHANGE_ORIGIN name ORIGIN_URL USER_URL ORIGIN_RENAME)
   if(ORIGIN_URL AND USER_URL)
     string(TOUPPER ${name} NAME)
     set(CHANGE_ORIGIN ${GIT_EXECUTABLE} remote set-url origin "${USER_URL}")
-    set(RM_REMOTE ${GIT_EXECUTABLE} remote rm ${ORIGIN_RENAME} || ${GIT_EXECUTABLE} status) #workaround to ignore remote rm return value
-    set(ADD_REMOTE ${GIT_EXECUTABLE} remote add ${ORIGIN_RENAME} "${ORIGIN_URL}")
+    set(RM_REMOTE
+      ${GIT_EXECUTABLE} remote rm ${ORIGIN_RENAME} || ${GIT_EXECUTABLE} status)
+    set(ADD_REMOTE
+      ${GIT_EXECUTABLE} remote add ${ORIGIN_RENAME} "${ORIGIN_URL}")
 
     ExternalProject_Add_Step(${name} change_origin
       COMMAND ${CHANGE_ORIGIN}
@@ -58,7 +58,7 @@ function(USE_EXTERNAL_CHANGE_ORIGIN name ORIGIN_URL USER_URL ORIGIN_RENAME)
   endif()
 endfunction()
 
-function(USE_EXTERNAL_BUILDONLY name)
+function(USE_EXTERNAL_MAKE name)
   ExternalProject_Get_Property(${name} binary_dir)
 
   get_property(cmd_set TARGET ${name} PROPERTY _EP_INSTALL_COMMAND SET)
@@ -68,14 +68,14 @@ function(USE_EXTERNAL_BUILDONLY name)
     _ep_get_build_command(${name} INSTALL cmd)
   endif()
 
-  add_custom_target(${name}-buildonly
+  add_custom_target(${name}-only
     COMMAND ${cmd}
-    COMMENT "Building ${name}"
+    COMMENT "Building only ${name}"
     WORKING_DIRECTORY ${binary_dir}
     )
-  add_custom_target(${name}-buildall
+  add_custom_target(${name}-make
     COMMAND ${cmd}
-    COMMENT "Building ${name}"
+    COMMENT "Dependencies built, building ${name}"
     WORKING_DIRECTORY ${binary_dir}
     )
   # snapshot module for release builds
@@ -83,7 +83,7 @@ function(USE_EXTERNAL_BUILDONLY name)
     add_custom_target(${name}-snapshot_install
       COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${MODULE_SNAPSHOT_DIR} -P cmake_install.cmake
       COMMENT "Installing snapshot of ${name}"
-      DEPENDS ${name}-buildonly
+      DEPENDS ${name}-only
       WORKING_DIRECTORY ${binary_dir}
       )
     add_custom_target(${name}-snapshot
@@ -92,10 +92,13 @@ function(USE_EXTERNAL_BUILDONLY name)
       WORKING_DIRECTORY ${binary_dir}
       DEPENDS ${name}-snapshot_install
     )
-    set_target_properties(${name}-snapshot_install PROPERTIES EXCLUDE_FROM_ALL ON)
-    set_target_properties(${name}-snapshot PROPERTIES EXCLUDE_FROM_ALL ON)
+    set_target_properties(${name}-snapshot_install
+      PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
+    set_target_properties(${name}-snapshot
+      PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
   endif()
-  set_target_properties(${name}-buildonly PROPERTIES EXCLUDE_FROM_ALL ON)
+  set_target_properties(${name}-only
+    PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 endfunction()
 
 function(_ep_add_test_command name)
@@ -109,16 +112,17 @@ function(_ep_add_test_command name)
   endif()
 
   string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
-  add_custom_target(${name}-test
+  add_custom_target(${name}-ci
     COMMAND ${cmd}
     COMMENT "Testing ${name}"
     WORKING_DIRECTORY ${binary_dir}
     DEPENDS ${name}
     )
-  add_custom_target(${name}-testonly
+  add_custom_target(${name}-test
     COMMAND ${cmd}
     COMMENT "Testing ${name}"
     WORKING_DIRECTORY ${binary_dir}
+    DEPENDS ${name}-make
     )
 endfunction()
 
@@ -243,7 +247,7 @@ function(USE_EXTERNAL name)
       if(_dep_check EQUAL 1)
         list(APPEND DEPENDS ${_dep})
         if("${DEPMODE}" STREQUAL "REQUIRED")
-          add_dependencies(${_dep}-projects ${name}-projects ${name}-buildall)
+          add_dependencies(${_dep}-projects ${name}-projects ${name}-make)
         endif()
       endif()
 
@@ -358,9 +362,10 @@ function(USE_EXTERNAL name)
     ${${NAME}_EXTRA}
     STEP_TARGETS ${USE_EXTERNAL_SUBTARGETS}
    )
-  set_target_properties(${name} PROPERTIES EXCLUDE_FROM_ALL ON)
+  set_target_properties(${name}
+    PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 
-  use_external_buildonly(${name})
+  use_external_make(${name})
   file(APPEND ${CMAKE_BINARY_DIR}/projects.make
     "${name}-%:\n"
     "	@\$(MAKE) -C ${CMAKE_BINARY_DIR} $@\n"
@@ -392,7 +397,8 @@ function(USE_EXTERNAL name)
     COMMENT "Cleaning ${name}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}"
     )
-  set_target_properties(${name}-clean PROPERTIES EXCLUDE_FROM_ALL ON)
+  set_target_properties(${name}-clean
+    PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 
   if(NOT APPLE)
     set(fakeroot fakeroot)
@@ -402,20 +408,6 @@ function(USE_EXTERNAL name)
     endif()
   endif()
 
-  add_custom_target(${name}-package
-    COMMAND ${fakeroot} ${cmd} package
-    COMMENT "Building package"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}"
-    )
-  set_target_properties(${name}-package PROPERTIES EXCLUDE_FROM_ALL ON)
-
-  add_custom_target(${name}-module
-    COMMAND ${cmd} module
-    COMMENT "Building module for ${name}"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${name}"
-    )
-  set_target_properties(${name}-module PROPERTIES EXCLUDE_FROM_ALL ON)
-
   setup_scm(${name})
 
   add_custom_target(${name}-stat
@@ -423,8 +415,8 @@ function(USE_EXTERNAL name)
     COMMENT "${name} Status:"
     WORKING_DIRECTORY "${${NAME}_SOURCE}"
     )
-  set_target_properties(${name}-stat PROPERTIES EXCLUDE_FROM_ALL ON)
-  set_target_properties(${name}-stat PROPERTIES FOLDER ${name})
+  set_target_properties(${name}-stat PROPERTIES FOLDER ${name}
+    EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
   add_dependencies(stats ${name}-stat)
 
   add_custom_target(${name}-reset
@@ -435,10 +427,12 @@ function(USE_EXTERNAL name)
     WORKING_DIRECTORY "${${NAME}_SOURCE}"
     DEPENDS ${name}-download
     )
-  set_target_properties(${name}-reset PROPERTIES EXCLUDE_FROM_ALL ON)
+  set_target_properties(${name}-reset
+    PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 
   add_custom_target(${name}-resetall DEPENDS ${name}-reset)
-  set_target_properties(${name}-resetall PROPERTIES EXCLUDE_FROM_ALL ON)
+  set_target_properties(${name}-resetall
+    PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 
   # bootstrapping
   set(BOOTSTRAPFILE ${CMAKE_CURRENT_BINARY_DIR}/${name}/bootstrap.cmake)
@@ -446,25 +440,25 @@ function(USE_EXTERNAL name)
     "file(GLOB sourcedir_list ${${NAME}_SOURCE}/*)\n
      list(LENGTH sourcedir_list numsourcefiles)\n
      if(numsourcefiles EQUAL 0)\n
-       message(FATAL_ERROR \"No sources for ${name} found. Please run '${name}' or 'build'.\")\n
+       message(FATAL_ERROR \"No sources for ${name} found. Please run '${name}' to download and configure ${name}.\")\n
      endif()\n
      if(NOT EXISTS \"${CMAKE_CURRENT_BINARY_DIR}/${name}/CMakeCache.txt\" AND\n
         NOT EXISTS \"${CMAKE_CURRENT_BINARY_DIR}/${name}/config.status\")\n
-       message(FATAL_ERROR \"${name} not configured. Please build '${name}' or 'build'.\")\n
+       message(FATAL_ERROR \"${name} not configured. Please build '${name}' to configure ${name}.\")\n
      endif()\n"
   )
   add_custom_target(${name}-bootstrap
     COMMAND ${CMAKE_COMMAND} -P ${BOOTSTRAPFILE})
-  add_dependencies(${name}-buildall ${name}-bootstrap)
-  set_target_properties(${name}-bootstrap PROPERTIES EXCLUDE_FROM_ALL ON)
-  set_target_properties(${name}-buildall PROPERTIES FOLDER ${name})
-  set_target_properties(${name}-bootstrap PROPERTIES FOLDER ${name})
+  set_target_properties(${name}-bootstrap PROPERTIES FOLDER ${name}
+    EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON )
+  add_dependencies(${name}-make ${name}-bootstrap)
+  set_target_properties(${name}-make PROPERTIES FOLDER ${name})
 
   foreach(_dep ${${NAME}_DEPENDS})
     get_target_property(_dep_check ${_dep} _EP_IS_EXTERNAL_PROJECT)
     if(_dep_check EQUAL 1)
       add_dependencies(${name}-resetall ${_dep}-resetall)
-      add_dependencies(${name}-buildall ${_dep}-buildall)
+      add_dependencies(${name}-make ${_dep}-make)
       if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         add_dependencies(${name}-snapshot_install ${_dep}-snapshot_install)
       endif()
@@ -472,24 +466,18 @@ function(USE_EXTERNAL name)
     endif()
   endforeach()
 
-  add_custom_target(${name}-deps
-    DEPENDS ${DEPENDS}
-    COMMENT "Building ${name} dependencies"
-    )
-  set_target_properties(${name}-deps PROPERTIES EXCLUDE_FROM_ALL ON)
-
   # disable tests if requested
   if(${NAME}_NOTEST)
     set(${NAME}_NOTESTONLY ON)
   endif()
 
   foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
-    set_target_properties(${name}-${subtarget} PROPERTIES EXCLUDE_FROM_ALL ON)
+    set_target_properties(${name}-${subtarget}
+      PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
   endforeach()
 
   if(${NAME}_OPTIONAL)
     set_target_properties(${name} PROPERTIES _EP_IS_OPTIONAL_PROJECT ON)
-    get_target_property(_optional ${name} _EP_IS_OPTIONAL_PROJECT)
   else() # add non-optional sub-targets to meta sub-targets
     foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
       string(TOUPPER ${subtarget} UPPER_SUBTARGET)
@@ -497,8 +485,7 @@ function(USE_EXTERNAL name)
         add_dependencies(${subtarget}s ${name}-${subtarget})
       endif()
     endforeach()
-    add_dependencies(AllProjects ${name})
-    add_dependencies(AllBuild ${name}-buildall)
+    add_dependencies(build ${name})
   endif()
 
   set_target_properties(${name} PROPERTIES FOLDER "00_Main")

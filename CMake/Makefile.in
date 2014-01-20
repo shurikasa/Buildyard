@@ -3,28 +3,19 @@
 
 BUILD ?= Build
 
+default:
+	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-only
+
 all:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-buildonly
-
-install:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-install
-
-deps:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-deps
-
-package:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-package
+	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-make
 
 configure:
 	@@CMAKE_COMMAND@ @CMAKE_BINARY_DIR@/@name@
 
 test:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@/$(BUILD)/@name@ tests
-
-clean:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-clean
+	@$(MAKE) --no-print-directory -C @BUILDYARD@/$(BUILD)/@name@ test
 
 include @BUILDYARD@/$(BUILD)/projects.make
 
 %:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@_$@
+	@$(MAKE) --no-print-directory -C @BUILDYARD@/${BUILD}/@name@ $@
