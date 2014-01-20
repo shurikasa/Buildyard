@@ -13,29 +13,31 @@ dotted bubbles, and optional dependencies linked using dotted arrows:
 
 [Presentation.pdf](https://github.com/Eyescale/Buildyard/blob/master/doc/Presentation.pdf?raw=true)
 
-## Using
+## Quick Start
 
 ### Visual Studio
 
-Use cmake to build a Visual Studio Solution. Build this solution at
-least once to download and install all dependencies. See 'Targets' below
-for more details.
+It is highly recommended to install a precompiled boost version using
+the installers provided by BoostPro.
+
+Use cmake to generate a Visual Studio Solution. Open this solution and
+build it at least once to download and install all dependencies. See
+'Targets' below for more details.
 
 For development, open [build]/[Project]/[Project].sln and work there as
 usual. This solution will build the (pre-configured) project without
 considering any dependencies. Use the [build]/Buildyard.sln target to
 build a project considering all dependencies.
 
-It is highly recommended to install a precompiled boost version using
-the installers provided by BoostPro.
-
 ### Others
 
-Execute 'make build' or 'make [Project]', which invokes cmake and builds
-debug versions of all or the specified project. On Ubuntu, 'make
-apt-get' installs all known package dependencies. On Mac OS X, 'make
-port-get' installed all known MacPorts dependencies. See 'Targets' below
-for more details.
+On Ubuntu, use 'make apt-get' to install all known package
+dependencies. On Mac OS X, use 'make port-get' to install all known
+MacPorts dependencies.
+
+Execute 'make build' or 'make [Project]' at least once, which downloads,
+configures and builds debug versions of all or the specified project. See
+'Targets' below for more details.
 
 For development, cd into src/[Project] and work there as usual. The
 default make target will build the (pre-configured) project without
