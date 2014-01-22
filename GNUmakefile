@@ -69,7 +69,7 @@ ${BUILD}/projects.make: $(BUILD)/Makefile
 
 -include ${BUILD}/projects.make
 
-.DEFAULT:
-	@$(MAKE) --no-print-directory $(BUILD)/Makefile
+.DEFAULT: $(BUILD)/Makefile
+	@$(MAKE) --no-print-directory -C $(BUILD) cmake_check_build_system
 	@$(MAKE) --no-print-directory -C $(BUILD) $(MAKECMDGOALS)
 endif
