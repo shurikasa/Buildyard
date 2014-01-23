@@ -17,7 +17,7 @@ include(LSBInfo)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
 
-set(USE_EXTERNAL_SUBTARGETS update make only configure test ci install download
+set(USE_EXTERNAL_SUBTARGETS update make only configure test install download
   Makefile stat clean reset resetall projects bootstrap)
 foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   add_custom_target(${subtarget}s)
@@ -112,17 +112,11 @@ function(_ep_add_test_command name)
   endif()
 
   string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
-  add_custom_target(${name}-ci
-    COMMAND ${cmd}
-    COMMENT "Testing ${name}"
-    WORKING_DIRECTORY ${binary_dir}
-    DEPENDS ${name}
-    )
   add_custom_target(${name}-test
     COMMAND ${cmd}
     COMMENT "Testing ${name}"
     WORKING_DIRECTORY ${binary_dir}
-    DEPENDS ${name}-make
+    DEPENDS ${name}
     )
 endfunction()
 
