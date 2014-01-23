@@ -4,7 +4,7 @@
 function(USE_EXTERNAL_GATHER_INSTALL NAME)
   # sets ${NAME}_DEBS and ${NAME}_PORTS from all dependencies on return
   set(DEBS pkg-config git git-svn subversion cmake autoconf automake git-review
-    ninja-build lcov doxygen)
+    ninja-build lcov doxygen cppcheck)
 
   # recurse to get dependency roots
   foreach(proj ${${NAME}_DEPENDS})
@@ -72,13 +72,13 @@ function(USE_EXTERNAL_DEPS name)
     " - mkdir Debug\n"
     " - cd Debug\n"
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Debug -DTRAVIS=1\n"
-    " - env TRAVIS=1 make -j8 cis ARGS=-V\n"
+    " - env TRAVIS=1 make -j2 tests ARGS=-V\n" # 1.5 cores on travis-ci.com
     " - mkdir ../Release\n"
     " - git status\n"
     " - git --no-pager diff\n"
     " - cd ../Release\n"
     " - cmake .. -DCI_BUILD_COMMIT=$TRAVIS_COMMIT -DCMAKE_BUILD_TYPE=Release -DTRAVIS=1\n"
-    " - env TRAVIS=1 make -j8 cis ARGS=-V\n"
+    " - env TRAVIS=1 make -j2 tests ARGS=-V\n"
     " - git status\n"
     " - git --no-pager diff\n"
     "before_install:\n"
