@@ -236,6 +236,8 @@ if(DEBS)
 
   add_custom_target(apt-get
     COMMAND sudo apt-get install ${DEBS}
+    # Force reconfiguration after package installation
+    COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
     COMMENT "Running 'sudo apt-get install ${DEBS}':")
 endif()
 

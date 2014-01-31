@@ -135,6 +135,7 @@ for all projects, e.g., 'makes' builds all projects.
 * update: Update all Buildyard configurations when called from Buildyard
   source directory, and updates project when called from project source
   directory.
+* info: Display the result of the last configuration run
 
 ### Per-Project Targets
 
