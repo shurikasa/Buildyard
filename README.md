@@ -51,8 +51,8 @@ BUILD=[directory]; make'.
 The per-project targets below are also available as aggregate targets
 for all projects, e.g., 'makes' builds all projects.
 
-* apt-get: 'sudo apt-get install' all packages needed on Ubuntu.
-* port-get: 'sudo port install' all MacPorts packages needed on Mac OS X.
+* apt-get: Install all packages using apt-get on Ubuntu.
+* port-get: Install all MacPorts packages needed on Mac OS X.
 * update: Update all Buildyard configurations when called from Buildyard
   source directory, and updates project when called from project source
   directory.
