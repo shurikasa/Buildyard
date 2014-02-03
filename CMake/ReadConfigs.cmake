@@ -128,16 +128,19 @@ endif()
 
 set(_configs)
 if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+  if(NOT TARGET update)
+    add_custom_target(update)
+  endif()
   if(BUILDYARD_REV)
     execute_process(
       COMMAND "${GIT_EXECUTABLE}" checkout -q "${BUILDYARD_REV}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
-    add_custom_target(update)
   else()
-    add_custom_target(update
+    add_custom_target(update_Buildyard
       COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
       COMMENT "Updating Buildyard"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_dependencies(update update_Buildyard)
   endif()
 else()
   add_custom_target(update)
@@ -236,6 +239,8 @@ if(DEBS)
 
   add_custom_target(apt-get
     COMMAND sudo apt-get install ${DEBS}
+    # Force reconfiguration after package installation
+    COMMAND ${CMAKE_COMMAND} -E touch "${CMAKE_BINARY_DIR}/CMakeCache.txt"
     COMMENT "Running 'sudo apt-get install ${DEBS}':")
 endif()
 
