@@ -82,7 +82,7 @@ really useful in the context of Buildyard.
 
 ### In-source Targets
 
-Buildyard will set up a Makefile in src/Project, if it safe to do
+Buildyard will set up a Makefile in src/Project, if it is safe to do
 so. This Makefile forwards to build/Project and allows to build all
 targets defined by the project. It also provides the following,
 additional targets:
