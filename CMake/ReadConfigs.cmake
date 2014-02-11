@@ -7,9 +7,6 @@ include(CreateDependencyGraph)
 include(GitExternal)
 include(GitTargets)
 
-option(CREATE_DEPENDENCY_GRAPH_CLUSTERS
-  "Create clusters for each configuration folder" OFF)
-
 if(APPLE)
   find_program(TAR_EXE gnutar)
 else()

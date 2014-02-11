@@ -3,6 +3,8 @@ find_program(DOT_EXECUTABLE dot)
 find_program(TRED_EXECUTABLE tred)
 add_custom_target(pngs)
 set_target_properties(pngs PROPERTIES EXCLUDE_FROM_ALL ON)
+option(CREATE_DEPENDENCY_GRAPH_CLUSTERS
+  "Create clusters for each configuration folder" OFF)
 
 function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
   string(TOUPPER ${name} NAME)
