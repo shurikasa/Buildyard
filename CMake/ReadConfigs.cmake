@@ -61,7 +61,7 @@ macro(READ_CONFIG_DIR DIR)
 
     # Read configurations in this configuration folder
     message(STATUS "Reading ${DIR}")
-    file(GLOB _files "${DIR}/*.cmake")
+
     set(_localFiles)
     if(EXISTS "${DIR}/depends.txt")
       set(_localFiles "${DIR}/depends.txt")
@@ -77,10 +77,17 @@ macro(READ_CONFIG_DIR DIR)
       include(${DIR}/Buildyard.cmake)
     endif()
 
+    file(RELATIVE_PATH BASEDIR ${CMAKE_CURRENT_SOURCE_DIR} ${DIR})
+    file(GLOB _files "${DIR}/*.cmake")
     foreach(_config ${_files})
       include(${_config})
       string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _config ${_config})
       list(APPEND _localFiles ${_config})
+
+      string(REPLACE ".cmake" "" NAME ${_config})
+      get_filename_component(NAME ${NAME} NAME)
+      string(TOUPPER ${NAME} NAME)
+      set(${NAME}_DIR ${BASEDIR})
     endforeach()
 
     if(TAR_EXE)

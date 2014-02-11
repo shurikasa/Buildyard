@@ -3,6 +3,8 @@ find_program(DOT_EXECUTABLE dot)
 find_program(TRED_EXECUTABLE tred)
 add_custom_target(pngs)
 set_target_properties(pngs PROPERTIES EXCLUDE_FROM_ALL ON)
+option(CREATE_DEPENDENCY_GRAPH_CLUSTERS
+  "Create clusters for each configuration folder" OFF)
 
 function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
   string(TOUPPER ${name} NAME)
@@ -11,6 +13,7 @@ function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
   else()
     set(label "${name}")
   endif()
+
   if(${NAME}_OPTIONAL OR NOT ${NAME}_PACKAGE_VERSION)
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
       "${name} [style=dashed, label=\"${label}\"]\n")
@@ -19,6 +22,21 @@ function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
       "${name} [style=solid, label=\"${label}\"]\n")
     file(APPEND ${FILE} "${name} [style=solid, label=\"${label}\"]\n")
+  endif()
+
+  if(CREATE_DEPENDENCY_GRAPH_CLUSTERS)
+    if(${NAME}_DIR)
+      string(REPLACE "." "" CLUSTER ${${NAME}_DIR})
+      file(APPEND ${FILE}
+        "subgraph cluster_${CLUSTER} { color=gray label=\"${${NAME}_DIR}\" ${name}; }\n")
+      file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
+        "subgraph cluster_${CLUSTER} { color=gray label=\"${${NAME}_DIR}\" ${name}; }\n")
+    else()
+      file(APPEND ${FILE}
+        "subgraph cluster_system { color=gray label=\"system\" ${name}; }\n")
+      file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
+        "subgraph cluster_system { color=gray label=\"system\" ${name}; }\n")
+    endif()
   endif()
 
   set(DEPMODE dashed)
