@@ -79,7 +79,7 @@ function(USE_EXTERNAL_MAKE name)
     WORKING_DIRECTORY ${binary_dir}
     )
   # snapshot module for release builds
-  if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+  if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     add_custom_target(${name}-snapshot_install
       COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${MODULE_SNAPSHOT_DIR} -P cmake_install.cmake
       COMMENT "Installing snapshot of ${name}"
