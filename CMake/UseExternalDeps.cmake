@@ -239,6 +239,8 @@ endif()
     "if(CMAKE_MODULE_INSTALL_PATH)\n"
     "  install(FILES \${OPTIONS_CMAKE} DESTINATION \${CMAKE_MODULE_INSTALL_PATH}\n"
     "    COMPONENT dev)\n"
+    "else()\n"
+    "  message(WARNING \"CMAKE_MODULE_INSTALL_PATH not set, old or missing Common.cmake?\")\n"
     "endif()\n"
     "file(APPEND \${DEFINES_FILE_IN}\n"
     "  \"\\n#endif\\n\")\n\n"
