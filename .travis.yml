@@ -34,9 +34,6 @@ before_install:
  - sudo apt-get install -qq libboost-system-dev || /bin/true
  - sudo apt-get install -qq libboost-test-dev || /bin/true
  - sudo apt-get install -qq libboost-thread-dev || /bin/true
- - sudo apt-get install -qq libboost_chrono || /bin/true
- - sudo apt-get install -qq libboost_system || /bin/true
- - sudo apt-get install -qq libboost_unit_test_framework || /bin/true
  - sudo apt-get install -qq libfcgi-dev || /bin/true
  - sudo apt-get install -qq libgl1-mesa-dev || /bin/true
  - sudo apt-get install -qq libglewmx1.6-dev || /bin/true
@@ -45,7 +42,6 @@ before_install:
  - sudo apt-get install -qq libibverbs-dev || /bin/true
  - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
  - sudo apt-get install -qq liblircclient-dev || /bin/true
- - sudo apt-get install -qq libogre-dev || /bin/true
  - sudo apt-get install -qq libopenal-dev || /bin/true
  - sudo apt-get install -qq libopencv-dev || /bin/true
  - sudo apt-get install -qq libopenmpi-dev || /bin/true
