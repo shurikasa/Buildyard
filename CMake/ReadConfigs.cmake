@@ -315,9 +315,8 @@ foreach(_dir ${_dirs})
         " - mkdir config.travis\n"
         " - cp ../*.* config.travis\n"
         " - env TRAVIS=1 make -j2 debug\n"
-        " - env TRAVIS=1 make -j2 release\n"
-        " - env TRAVIS=1 make tests -C Debug\n"
-        " - env TRAVIS=1 make tests -C Release\n")
+        " - env TRAVIS=1 make tests -C Debug\n")
+      # don't run release in addition - travis has a 50 min timeout
     endif()
   endif()
 endforeach()
