@@ -283,8 +283,8 @@ file(APPEND ${CMAKE_CURRENT_SOURCE_DIR}/.travis.yml
   " - mkdir config.none\n"
   " - env TRAVIS=1 make -j2 debug\n"
   " - env TRAVIS=1 make -j2 release\n"
-  " - env TRAVIS=1 make tests -C Debug\n"
-  " - env TRAVIS=1 make tests -C Release\n")
+  " - env TRAVIS=1 make tests ARGS=-V -C Debug\n"
+  " - env TRAVIS=1 make tests ARGS=-V -C Release\n")
 
 foreach(_dir ${_dirs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
@@ -315,7 +315,7 @@ foreach(_dir ${_dirs})
         " - mkdir config.travis\n"
         " - cp ../*.* config.travis\n"
         " - env TRAVIS=1 make -j2 debug\n"
-        " - env TRAVIS=1 make tests -C Debug\n")
+        " - env TRAVIS=1 make tests ARGS=-V -C Debug\n")
       # don't run release in addition - travis has a 50 min timeout
     endif()
   endif()
