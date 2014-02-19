@@ -19,6 +19,7 @@ before_install:
  - sudo apt-get install -qq git-svn || /bin/true
  - sudo apt-get install -qq lcov || /bin/true
  - sudo apt-get install -qq libass-dev || /bin/true
+ - sudo apt-get install -qq libast2-dev || /bin/true
  - sudo apt-get install -qq libavahi-compat-libdnssd-dev || /bin/true
  - sudo apt-get install -qq libavcodec-dev || /bin/true
  - sudo apt-get install -qq libavdevice-dev || /bin/true
