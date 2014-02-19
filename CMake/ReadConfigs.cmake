@@ -144,6 +144,8 @@ if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
   else()
     add_custom_target(update_Buildyard
+      COMMAND ${GIT_EXECUTABLE} reset -q .travis.yml
+      COMMAND ${GIT_EXECUTABLE} checkout -q -- .travis.yml
       COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
       COMMENT "Updating Buildyard"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -190,6 +192,8 @@ foreach(_dir ${_dirs})
 
     if(NOT BUILDYARD_REV AND _dir MATCHES "config.")
       add_custom_target(${_dirName}-update
+        COMMAND ${GIT_EXECUTABLE} reset -q .travis.yml || ${GIT_EXECUTABLE} status
+        COMMAND ${GIT_EXECUTABLE} checkout -q -- .travis.yml || ${GIT_EXECUTABLE} status
         COMMAND ${GIT_EXECUTABLE} pull
         COMMENT "Updating ${_dirName}"
         WORKING_DIRECTORY "${_dir}"
