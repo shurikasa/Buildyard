@@ -8,7 +8,7 @@ set(BOOST_OPTIONAL ON)
 set(BOOST_CMAKE_INCLUDE "SYSTEM")
 
 set(BOOST_BUILD_LIBRARIES serialization system regex date_time thread filesystem
-                          program_options test)
+                          timer program_options test)
 find_package(PythonLibs QUIET)
 if(PYTHONLIBS_FOUND)
   list(APPEND BOOST_BUILD_LIBRARIES python)
