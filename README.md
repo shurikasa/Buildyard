@@ -37,8 +37,8 @@ configures and builds debug versions of all or the specified project. See
 
 For development, cd into src/[Project] and work there as usual. The
 default make target will build the (pre-configured) project without
-considering any dependencies. 'make [Project]' will build the project
-considering all dependencies.
+considering any dependencies. 'make all' will build the project
+considering all (pre-configured) dependencies.
 
 Custom CMake binary directories are supported and can be used through
 the top-level make using 'make BUILD=[directory]' or 'export
