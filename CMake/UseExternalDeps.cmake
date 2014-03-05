@@ -1,10 +1,11 @@
 
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
+set(OPTIONAL_DEBS ninja-build lcov cppcheck git-svn)
 
 function(USE_EXTERNAL_GATHER_INSTALL NAME)
   # sets ${NAME}_DEBS and ${NAME}_PORTS from all dependencies on return
-  set(DEBS pkg-config git git-svn subversion cmake autoconf automake git-review
-    ninja-build lcov doxygen cppcheck)
+  set(DEBS pkg-config git subversion cmake autoconf automake git-review doxygen
+    ${OPTIONAL_DEBS})
   set(PORTS cppcheck)
 
   # recurse to get dependency roots
@@ -205,7 +206,9 @@ endif()
     "${_use_external_post}\n")
 
   if(${NAME}_DEBS)  # setup for CPACK_DEBIAN_BUILD_DEPENDS
-    file(APPEND ${_fpIn} "set(${NAME}_BUILD_DEBS ${${NAME}_DEBS})\n")
+    set(BUILD_DEBS ${${NAME}_DEBS})
+    list(REMOVE_ITEM BUILD_DEBS ${OPTIONAL_DEBS})
+    file(APPEND ${_fpIn} "set(${NAME}_BUILD_DEBS ${BUILD_DEBS})\n")
   endif()
 
   file(APPEND ${_fpIn} "\n"
