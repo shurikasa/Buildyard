@@ -26,8 +26,7 @@ endif()")
   ExternalProject_Add_Step(${name} rmMakefile
     COMMENT "Removing in-source Makefile"
     COMMAND ${CMAKE_COMMAND} -P ${_scriptdir}/rmMakefile.cmake
-    DEPENDEES mkdir DEPENDERS download ALWAYS 1
-    )
+    DEPENDEES mkdir DEPENDERS download ALWAYS 1)
 
   # Move our Makefile in place if no other exists
   file(WRITE ${_scriptdir}/cpMakefile.cmake "
@@ -46,6 +45,5 @@ endif()")
   ExternalProject_Add_Step(${name} Makefile
     COMMENT "Adding in-source Makefile"
     COMMAND ${CMAKE_COMMAND} -DBUILDYARD:PATH=${CMAKE_CURRENT_SOURCE_DIR} -P ${_scriptdir}/cpMakefile.cmake
-    DEPENDEES configure DEPENDERS build ALWAYS 1
-    )
+    DEPENDEES configure DEPENDERS build ALWAYS 1)
 endfunction()
