@@ -7,7 +7,7 @@ project(Buildyard)
 set(VERSION_MAJOR "2014")
 set(VERSION_MINOR "3")
 set(VERSION_PATCH "0")
-set(RELEASE_VERSION 0) # OFF or ABI version
+set(RELEASE_VERSION ON) # OFF or ABI version
 
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake
