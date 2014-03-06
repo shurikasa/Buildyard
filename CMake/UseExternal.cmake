@@ -18,7 +18,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
 
 set(USE_EXTERNAL_SUBTARGETS update make only configure test install download
-  Makefile stat clean reset resetall projects bootstrap)
+  Makefile stat clean reset resetall projects bootstrap doxygit)
 foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   add_custom_target(${subtarget}s)
   set_target_properties(${subtarget}s PROPERTIES FOLDER "00_Meta")
@@ -76,6 +76,11 @@ function(USE_EXTERNAL_MAKE name)
   add_custom_target(${name}-make
     COMMAND ${cmd}
     COMMENT "Dependencies built, building ${name}"
+    WORKING_DIRECTORY ${binary_dir}
+    )
+  add_custom_target(${name}-doxygit
+    COMMAND ${cmd} doxygit
+    COMMENT "Build and copy doxygen documentation for ${name}"
     WORKING_DIRECTORY ${binary_dir}
     )
   # snapshot module for release builds

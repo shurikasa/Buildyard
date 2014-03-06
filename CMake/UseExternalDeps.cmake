@@ -1,10 +1,11 @@
 
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
+set(OPTIONAL_DEBS ninja-build lcov cppcheck git-svn)
 
 function(USE_EXTERNAL_GATHER_INSTALL NAME)
   # sets ${NAME}_DEBS and ${NAME}_PORTS from all dependencies on return
-  set(DEBS pkg-config git git-svn subversion cmake autoconf automake git-review
-    ninja-build lcov doxygen cppcheck)
+  set(DEBS pkg-config git subversion cmake autoconf automake git-review doxygen
+    ${OPTIONAL_DEBS})
   set(PORTS cppcheck)
 
   # recurse to get dependency roots
@@ -205,7 +206,9 @@ endif()
     "${_use_external_post}\n")
 
   if(${NAME}_DEBS)  # setup for CPACK_DEBIAN_BUILD_DEPENDS
-    file(APPEND ${_fpIn} "set(${NAME}_BUILD_DEBS ${${NAME}_DEBS})\n")
+    set(BUILD_DEBS ${${NAME}_DEBS})
+    list(REMOVE_ITEM BUILD_DEBS ${OPTIONAL_DEBS})
+    file(APPEND ${_fpIn} "set(${NAME}_BUILD_DEBS ${BUILD_DEBS})\n")
   endif()
 
   file(APPEND ${_fpIn} "\n"
@@ -245,7 +248,7 @@ endif()
     "file(APPEND \${DEFINES_FILE_IN}\n"
     "  \"\\n#endif\\n\")\n\n"
     "include(UpdateFile)\n"
-    "update_file(\${DEFINES_FILE_IN} \${DEFINES_FILE})\n"
+    "configure_file(\${DEFINES_FILE_IN} \${DEFINES_FILE} COPYONLY)\n"
     "if(Boost_FOUND) # another WAR for broken boost stuff...\n"
     "  set(Boost_VERSION \${Boost_MAJOR_VERSION}.\${Boost_MINOR_VERSION}.\${Boost_SUBMINOR_VERSION})\n"
     "endif()\n"
@@ -287,11 +290,11 @@ set(${NAME}_SOURCE \${CMAKE_SOURCE_DIR})")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake
   ${CMAKE_SOURCE_DIR}/CMake/common)
 include(UpdateFile)
-update_file(${_fpIn} ${_fpOut})
-update_file(${_ciIn} ${_ciOut})
-update_file(${_configIn} ${_configOut})
-update_file(${_dependsIn} ${_dependsOut})
-update_file(${_reqIn} ${_reqOut})
+configure_file(${_fpIn} ${_fpOut} COPYONLY)
+configure_file(${_ciIn} ${_ciOut} COPYONLY)
+configure_file(${_configIn} ${_configOut} COPYONLY)
+configure_file(${_dependsIn} ${_dependsOut} COPYONLY)
+configure_file(${_reqIn} ${_reqOut} COPYONLY)
 ")
 
   setup_scm(${name})
