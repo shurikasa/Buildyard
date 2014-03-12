@@ -5,14 +5,14 @@ find_package(Git REQUIRED)
 find_package(PkgConfig)
 find_package(Subversion)
 
-include(SCM)
-include(ExternalProject)
 include(CMakeParseArguments)
-include(UseExternalClone)
-include(UseExternalMakefile)
-include(UseExternalDeps)
-include(UseExternalAutoconf)
+include(ExternalProject)
 include(LSBInfo)
+include(SCM)
+include(UseExternalAutoconf)
+include(UseExternalDeps)
+include(UseExternalMakefile)
+include(UseExternalShallowClone)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
@@ -71,18 +71,17 @@ function(USE_EXTERNAL_MAKE name)
   add_custom_target(${name}-only
     COMMAND ${cmd}
     COMMENT "Building only ${name}"
-    WORKING_DIRECTORY ${binary_dir}
-    )
+    WORKING_DIRECTORY ${binary_dir})
   add_custom_target(${name}-make
     COMMAND ${cmd}
     COMMENT "Dependencies built, building ${name}"
-    WORKING_DIRECTORY ${binary_dir}
-    )
+    WORKING_DIRECTORY ${binary_dir})
   add_custom_target(${name}-doxygit
     COMMAND ${cmd} doxygit
     COMMENT "Build and copy doxygen documentation for ${name}"
     WORKING_DIRECTORY ${binary_dir}
-    )
+    DEPENDS ${name}-only)
+
   # snapshot module for release builds
   if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     add_custom_target(${name}-snapshot_install
@@ -364,6 +363,7 @@ function(USE_EXTERNAL name)
   set_target_properties(${name}
     PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 
+  use_external_shallow_clone(${name})
   use_external_make(${name})
   file(APPEND ${CMAKE_BINARY_DIR}/projects.make
     "${name}-%:\n"
@@ -468,6 +468,7 @@ function(USE_EXTERNAL name)
   # disable tests if requested
   if(${NAME}_NOTEST)
     set(${NAME}_NOTESTONLY ON)
+    set(${NAME}_NODOXYGIT ON)
   endif()
 
   foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})

@@ -44,7 +44,6 @@ before_install:
  - sudo apt-get install -qq libibverbs-dev || /bin/true
  - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
  - sudo apt-get install -qq liblircclient-dev || /bin/true
- - sudo apt-get install -qq libogre-dev || /bin/true
  - sudo apt-get install -qq libopenal-dev || /bin/true
  - sudo apt-get install -qq libopencv-dev || /bin/true
  - sudo apt-get install -qq libopenmpi-dev || /bin/true
