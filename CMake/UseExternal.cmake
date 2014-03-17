@@ -12,7 +12,7 @@ include(SCM)
 include(UseExternalAutoconf)
 include(UseExternalDeps)
 include(UseExternalMakefile)
-include(UseExternalShallowClone)
+include(UseExternalGitClone)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
@@ -363,7 +363,7 @@ function(USE_EXTERNAL name)
   set_target_properties(${name}
     PROPERTIES EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON)
 
-  use_external_shallow_clone(${name})
+  use_external_git_clone(${name})
   use_external_make(${name})
   file(APPEND ${CMAKE_BINARY_DIR}/projects.make
     "${name}-%:\n"
