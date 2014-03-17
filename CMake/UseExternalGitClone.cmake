@@ -20,19 +20,17 @@ function(use_external_git_clone name)
   file(READ ${git_clone_script} content)
 
   # Be nicer than ExternalProject
-  string(REGEX REPLACE "remove_directory" "touch_nocreate" content ${content})
-  string(REGEX REPLACE "remove directory" "touch" content ${content})
   string(REPLACE "if(NOT run)"
 "if(IS_DIRECTORY \"${source_dir}/.git\")
   message(STATUS \"Don't re-clone existing git repo ${source_dir}\")
   return()
 endif()
-if(NOT run)\n" content ${content})
+if(NOT run)" content ${content})
 
   # shallow clone
   if(${NAME}_REPO_DEPTH)
     string(REGEX REPLACE
-      "\"[ ]+clone[ ]+" "\" clone --depth ${${NAME}_REPO_DEPTH} \""
+      "\"[ ]+clone[ ]+\"" "\" clone --depth ${${NAME}_REPO_DEPTH} \""
       content ${content})
   endif()
 
