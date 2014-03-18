@@ -20,12 +20,11 @@ function(use_external_git_clone name)
   file(READ ${git_clone_script} content)
 
   # Be nicer than ExternalProject
-  string(REPLACE "if(NOT run)"
-"if(IS_DIRECTORY \"${source_dir}/.git\")
+  set(content "if(IS_DIRECTORY \"${source_dir}/.git\")
   message(STATUS \"Don't re-clone existing git repo ${source_dir}\")
   return()
 endif()
-if(NOT run)" content ${content})
+${content}")
 
   # shallow clone
   if(${NAME}_REPO_DEPTH)
