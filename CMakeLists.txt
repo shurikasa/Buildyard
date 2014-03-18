@@ -4,8 +4,8 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(Buildyard)
 
-set(VERSION_MAJOR "2013")
-set(VERSION_MINOR "9")
+set(VERSION_MAJOR "2014")
+set(VERSION_MINOR "3")
 set(VERSION_PATCH "0")
 set(RELEASE_VERSION 0) # OFF or ABI version
 
