@@ -264,7 +264,7 @@ endif()
     "  if(NOT EXISTS \${QT_USE_FILE})\n"
     "    message(WARNING \"Can't find QT_USE_FILE!\")\n"
     "  else()\n"
-    "    set(_customUseQt4File "\${CMAKE_BINARY_DIR}/UseQt4.cmake")\n"
+    "    set(_customUseQt4File \"\${CMAKE_BINARY_DIR}/UseQt4.cmake\")\n"
     "    file(READ \${QT_USE_FILE} content)\n"
     "    # Change all include_directories() to use the SYSTEM option\n"
     "    string(REPLACE \"include_directories(\" \"include_directories(SYSTEM \" content \${content})\n"
