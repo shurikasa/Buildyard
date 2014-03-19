@@ -302,9 +302,11 @@ function(USE_EXTERNAL name)
         set(REPO_ORIGIN_NAME "origin")
       endif()
     endif()
-    # pull fails if tag is a SHA hash, use git status to set exit value to true
-    set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${${NAME}_REPO_TAG} || ${GIT_EXECUTABLE} status
+    set(UPDATE_CMD ${GIT_EXECUTABLE} remote update || ${GIT_EXECUTABLE} status
         ALWAYS TRUE)
+    # pull fails if tag is a SHA hash, use git status to set exit value to true
+#    set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${${NAME}_REPO_TAG} || ${GIT_EXECUTABLE} status
+#        ALWAYS TRUE)
   elseif(REPO_TYPE STREQUAL "SVN")
     if(NOT SUBVERSION_FOUND)
       message(STATUS "Skip ${name}: missing subversion")
