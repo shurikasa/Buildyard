@@ -279,6 +279,7 @@ function(USE_EXTERNAL name)
   endif()
   string(TOUPPER ${REPO_TYPE} REPO_TYPE)
   set(REPOSITORY ${REPO_TYPE}_REPOSITORY)
+
   if(REPO_TYPE STREQUAL "GIT-SVN")
     set(REPO_TYPE GIT)
     set(REPO_TAG GIT_TAG)
@@ -302,11 +303,28 @@ function(USE_EXTERNAL name)
         set(REPO_ORIGIN_NAME "origin")
       endif()
     endif()
-    set(UPDATE_CMD ${GIT_EXECUTABLE} remote update || ${GIT_EXECUTABLE} status
-        ALWAYS TRUE)
-    # pull fails if tag is a SHA hash, use git status to set exit value to true
-#    set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${${NAME}_REPO_TAG} || ${GIT_EXECUTABLE} status
-#        ALWAYS TRUE)
+
+    set(REPO_UPDATE_TYPE ${${NAME}_REPO_UPDATE_TYPE})
+    if(NOT REPO_UPDATE_TYPE)
+      set(REPO_UPDATE_TYPE "NONE")
+    endif()
+    string(TOUPPER ${REPO_UPDATE_TYPE} REPO_UPDATE_TYPE)
+    message(STATUS "For project: ${NAME} - REPO_UPDATE_TYPE set to ${REPO_UPDATE_TYPE}")
+
+    if(REPO_UPDATE_TYPE STREQUAL "REMOTE_UPDATE")
+      set(UPDATE_CMD ${GIT_EXECUTABLE} remote update || ${GIT_EXECUTABLE} status
+          ALWAYS TRUE)
+    elseif(REPO_UPDATE_TYPE STREQUAL "FETCH_MERGE")
+      # pull fails if tag is a SHA hash, use git status to set exit value to true
+      set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${${NAME}_REPO_TAG} || ${GIT_EXECUTABLE} status
+          ALWAYS TRUE)
+    elseif(REPO_UPDATE_TYPE STREQUAL "CMAKE_DEFAULT")
+      unset(UPDATE_CMD)
+    else()
+      # do nothing for update (not default update for external projects)
+      set(UPDATE_CMD "")
+    endif()
+
   elseif(REPO_TYPE STREQUAL "SVN")
     if(NOT SUBVERSION_FOUND)
       message(STATUS "Skip ${name}: missing subversion")
