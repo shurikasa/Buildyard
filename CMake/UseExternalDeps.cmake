@@ -268,6 +268,7 @@ endif()
     "    file(READ \${QT_USE_FILE} content)\n"
     "    # Change all include_directories() to use the SYSTEM option\n"
     "    string(REPLACE \"include_directories(\" \"include_directories(SYSTEM \" content \${content})\n"
+    "    string(REPLACE \"INCLUDE_DIRECTORIES(\" \"INCLUDE_DIRECTORIES(SYSTEM \" content \${content})\n"
     "    file(WRITE \${_customUseQt4File} \${content})\n"
     "    set(QT_USE_FILE \${_customUseQt4File})\n"
     "    include(\${QT_USE_FILE})\n"
