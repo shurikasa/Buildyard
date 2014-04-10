@@ -155,7 +155,7 @@ set(FIND_REQUIRED_FAILED)")
         if(DEPMODE STREQUAL " REQUIRED")
           file(APPEND ${_fpIn}
             "  if((NOT ${_dep}_FOUND) AND (NOT ${_DEP}_FOUND))\n"
-            "    message(FATAL_ERROR \"Could not find ${_dep}\")\n"
+            "    message(FATAL_ERROR \"Could not find ${_dep}${COMPONENTS_NOT_REQUIRED}\")\n"
             "  endif()\n")
         endif()
         file(APPEND ${_fpIn}
