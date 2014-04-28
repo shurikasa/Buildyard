@@ -28,6 +28,7 @@ before_install:
  - sudo apt-get install -qq libboost-chrono-dev || /bin/true
  - sudo apt-get install -qq libboost-date-time-dev || /bin/true
  - sudo apt-get install -qq libboost-filesystem-dev || /bin/true
+ - sudo apt-get install -qq libboost-iostreams-dev || /bin/true
  - sudo apt-get install -qq libboost-program-options-dev || /bin/true
  - sudo apt-get install -qq libboost-python-dev || /bin/true
  - sudo apt-get install -qq libboost-regex-dev || /bin/true
@@ -44,6 +45,7 @@ before_install:
  - sudo apt-get install -qq libibverbs-dev || /bin/true
  - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
  - sudo apt-get install -qq liblircclient-dev || /bin/true
+ - sudo apt-get install -qq libogre-1.8-dev || /bin/true
  - sudo apt-get install -qq libopenal-dev || /bin/true
  - sudo apt-get install -qq libopencv-dev || /bin/true
  - sudo apt-get install -qq libopenmpi-dev || /bin/true
@@ -65,6 +67,8 @@ before_install:
  - sudo apt-get install -qq openmpi-bin || /bin/true
  - sudo apt-get install -qq pkg-config || /bin/true
  - sudo apt-get install -qq subversion || /bin/true
+ - sudo apt-get install -qq vagrant || /bin/true
+ - sudo apt-get install -qq virtualbox || /bin/true
 script:
  - mkdir config.none
  - env TRAVIS=1 make -j2 debug
