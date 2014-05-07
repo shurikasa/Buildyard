@@ -5,6 +5,8 @@ find_package(Git REQUIRED)
 find_package(PkgConfig)
 find_package(Subversion)
 
+option(BUILDYARD_UPDATE_REBASE
+  "Try to merge fetched updates for project source folders" ON)
 if(TRAVIS)
   option(BUILDYARD_BUILD_OPTIONAL "Build optional project dependencies" OFF)
 else()
@@ -304,27 +306,10 @@ function(USE_EXTERNAL name)
       endif()
     endif()
 
-    set(REPO_UPDATE_POLICY ${${NAME}_REPO_UPDATE_POLICY})
-    if(NOT REPO_UPDATE_POLICY)
-      set(REPO_UPDATE_POLICY "NONE")
-    endif()
-    string(TOUPPER ${REPO_UPDATE_POLICY} REPO_UPDATE_POLICY)
-    message(STATUS "For project: ${NAME} - REPO_UPDATE_POLICY set to ${REPO_UPDATE_POLICY}")
-
-    if(REPO_UPDATE_POLICY STREQUAL "REMOTE_UPDATE")
-      set(UPDATE_CMD ${GIT_EXECUTABLE} remote update || ${GIT_EXECUTABLE} status
-          ALWAYS TRUE)
-    elseif(REPO_UPDATE_POLICY STREQUAL "FETCH_MERGE")
-      # pull fails if tag is a SHA hash, use git status to set exit value to true
-      set(UPDATE_CMD ${GIT_EXECUTABLE} pull ${REPO_ORIGIN_NAME} ${${NAME}_REPO_TAG} || ${GIT_EXECUTABLE} status
-          ALWAYS TRUE)
-    elseif(REPO_UPDATE_POLICY STREQUAL "CMAKE_DEFAULT")
-      unset(UPDATE_CMD)
-    else()
-      # do nothing for update (not default update for external projects)
-      set(UPDATE_CMD "")
-    endif()
-
+    set(UPDATE_CMD ${CMAKE_COMMAND}
+      -DGIT_EXECUTABLE=${GIT_EXECUTABLE} -DREPO_TAG=${${NAME}_REPO_TAG}
+      -DBUILDYARD_UPDATE_REBASE=${BUILDYARD_UPDATE_REBASE}
+      -P ${CMAKE_CURRENT_LIST_DIR}/GitUpdate.cmake ALWAYS TRUE)
   elseif(REPO_TYPE STREQUAL "SVN")
     if(NOT SUBVERSION_FOUND)
       message(STATUS "Skip ${name}: missing subversion")

@@ -146,7 +146,7 @@ if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     add_custom_target(update_Buildyard
       COMMAND ${GIT_EXECUTABLE} reset -q .travis.yml
       COMMAND ${GIT_EXECUTABLE} checkout -q -- .travis.yml
-      COMMAND ${GIT_EXECUTABLE} remote update || ${GIT_EXECUTABLE} status
+      COMMAND ${GIT_EXECUTABLE} pull || ${GIT_EXECUTABLE} status
       COMMENT "Updating Buildyard"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     add_dependencies(update update_Buildyard)
@@ -158,7 +158,7 @@ else()
 endif()
 if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config.local/.git")
   add_custom_target(config.local-update
-    COMMAND ${GIT_EXECUTABLE} remote update
+    COMMAND ${GIT_EXECUTABLE} pull
     COMMENT "Updating config.local"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/config.local"
     )
@@ -196,7 +196,7 @@ foreach(_dir ${_dirs})
       add_custom_target(${_dirName}-update
         COMMAND ${GIT_EXECUTABLE} reset -q .travis.yml || ${GIT_EXECUTABLE} status
         COMMAND ${GIT_EXECUTABLE} checkout -q -- .travis.yml || ${GIT_EXECUTABLE} status
-        COMMAND ${GIT_EXECUTABLE} remote update
+        COMMAND ${GIT_EXECUTABLE} pull
         COMMENT "Updating ${_dirName}"
         WORKING_DIRECTORY "${_dir}"
         )

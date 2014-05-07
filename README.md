@@ -44,6 +44,13 @@ Custom CMake binary directories are supported and can be used through
 the top-level make using 'make BUILD=[directory]' or 'export
 BUILD=[directory]; make'.
 
+## Options
+
+* BUILDYARD_UPDATE_REBASE: Try to rebase fetched updates into the project
+  source folder. Default on. Aborts the rebase on merge conflicts.
+* BUILDYARD_BUILD_OPTIONAL: Build optional dependencies when building a
+  project. Default on.
+
 ## Targets
 
 ### Generic Targets
@@ -121,7 +128,6 @@ It contains the following variables:
 * PROJECT\_REPO\_URL: git or svn repository URL.
 * PROJECT\_REPO\_TAG: The svn revision or git tag to use to build the project.
 * PROJECT\_REPO\_DEPTH: Depth of the git clone for shallow clones.
-* PROJECT\_REPO\_UPDATE\_POLICY: The git update type. One of: "NONE" (Buildyard default: no command executed, no changes), "REMOTE_UPDATE" (git remote update), "FETCH_MERGE" (git pull), "CMAKE_DEFAULT" (default CMake behaviour). 
 * PROJECT\_ROOT\_VAR: optional CMake variable name for the project root,
   as required by the project find script. Default is PROJECT\_ROOT.
 * PROJECT\_TAIL\_REVISION: The oldest revision a git-svn repository should
