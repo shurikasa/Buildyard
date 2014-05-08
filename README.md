@@ -44,6 +44,13 @@ Custom CMake binary directories are supported and can be used through
 the top-level make using 'make BUILD=[directory]' or 'export
 BUILD=[directory]; make'.
 
+## Options
+
+* BUILDYARD_UPDATE_REBASE: Try to rebase fetched updates into the project
+  source folder. Default on. Aborts the rebase on merge conflicts.
+* BUILDYARD_BUILD_OPTIONAL: Build optional dependencies when building a
+  project. Default on.
+
 ## Targets
 
 ### Generic Targets

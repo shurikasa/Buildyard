@@ -4,6 +4,7 @@ Release
 config.*/
 config/*.png
 CMakeLists.txt.user*
+*.creator.user
 build*
 Build*
 CMakeFiles
