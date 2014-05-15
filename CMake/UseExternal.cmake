@@ -147,6 +147,7 @@ function(USE_EXTERNAL name)
   if(_check) # tested, be quiet and propagate upwards
     set(BUILDING ${BUILDING} PARENT_SCOPE)
     set(SKIPPING ${SKIPPING} PARENT_SCOPE)
+    set(NOTINSTALLED ${NOTINSTALLED} PARENT_SCOPE)
     set(USING ${USING} PARENT_SCOPE)
     return()
   endif()
@@ -223,10 +224,14 @@ function(USE_EXTERNAL name)
 
   if(NOT ${NAME}_REPO_URL)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
-    message(STATUS "Skip ${name}: No source repository configured")
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
-      "Skip ${name}: No source repository configured\n")
-    set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
+    if(${NAME}_HAS_CONFIG)
+      message(STATUS "Skip ${name}: No source repository configured")
+      file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
+        "Skip ${name}: No source repository configured\n")
+      set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
+    else()
+      set(NOTINSTALLED ${NOTINSTALLED} ${name} PARENT_SCOPE)
+    endif()
     return()
   endif()
 
@@ -341,7 +346,8 @@ function(USE_EXTERNAL name)
     set(MODULE_SNAPSHOT_DIR ${CMAKE_CURRENT_BINARY_DIR}/snapshot)
   endif()
 
-  list(APPEND CMAKE_PREFIX_PATH ${INSTALL_PATH})
+  list(APPEND CMAKE_PREFIX_PATH ${INSTALL_PATH} /opt/local)
+  list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
   set(ARGS -DBUILDYARD:BOOL=ON -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
            -DENABLE_COVERAGE:STRING=${ENABLE_COVERAGE}
            -DENABLE_WARN_DEPRECATED=${ENABLE_WARN_DEPRECATED}
@@ -511,5 +517,6 @@ function(USE_EXTERNAL name)
   set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
   set(BUILDING ${BUILDING} ${name} PARENT_SCOPE)
   set(SKIPPING ${SKIPPING} PARENT_SCOPE)
+  set(NOTINSTALLED ${NOTINSTALLED} PARENT_SCOPE)
   set(USING ${USING} PARENT_SCOPE)
 endfunction()
