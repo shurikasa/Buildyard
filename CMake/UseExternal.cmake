@@ -224,14 +224,7 @@ function(USE_EXTERNAL name)
 
   if(NOT ${NAME}_REPO_URL)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
-    if(${NAME}_HAS_CONFIG)
-      message(STATUS "Skip ${name}: No source repository configured")
-      file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/info.cmake
-        "Skip ${name}: No source repository configured\n")
-      set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
-    else()
-      set(NOTINSTALLED ${NOTINSTALLED} ${name} PARENT_SCOPE)
-    endif()
+    set(NOTINSTALLED ${NOTINSTALLED} ${name} PARENT_SCOPE)
     return()
   endif()
 
