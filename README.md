@@ -72,7 +72,7 @@ for all projects, e.g., 'makes' builds all projects.
 * PROJECT-only: Build only the given project without considering
   dependencies, update and configure steps. This is the recommended way
   to rebuild a project in a bootstrapped Buildyard instance.
-* PROJECT-make: Build the given project and all its dependencies without
+* PROJECT-all: Build the given project and all its dependencies without
   considering the update and configure steps. This is the recommended
   way to rebuild a project and all its dependencies in a bootstrapped
   Buildyard instance.
@@ -97,7 +97,7 @@ additional targets:
 * default: Build this project only, equivalent to PROJECT-only in the
   build directory
 * all: Build this project and all dependencies, equivalent to
-  PROJECT-make in the build directory
+  PROJECT-all in the build directory
 * configure: Reconfigure this project using cmake, equivalent to 'cmake
   Build/PROJECT'
 

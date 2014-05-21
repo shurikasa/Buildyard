@@ -25,7 +25,7 @@ include(UseExternalGitClone)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 file(REMOVE ${CMAKE_BINARY_DIR}/projects.make)
 
-set(USE_EXTERNAL_SUBTARGETS update make only configure test install download
+set(USE_EXTERNAL_SUBTARGETS update all only configure test install download
   Makefile stat clean reset resetall projects bootstrap doxygit)
 foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
   add_custom_target(${subtarget}s)
@@ -80,7 +80,7 @@ function(USE_EXTERNAL_MAKE name)
     COMMAND ${cmd}
     COMMENT "Building only ${name}"
     WORKING_DIRECTORY ${binary_dir})
-  add_custom_target(${name}-make
+  add_custom_target(${name}-all
     COMMAND ${cmd}
     COMMENT "Dependencies built, building ${name}"
     WORKING_DIRECTORY ${binary_dir})
@@ -252,7 +252,7 @@ function(USE_EXTERNAL name)
         if(_dep_check EQUAL 1)
           list(APPEND DEPENDS ${_dep})
           if("${DEPMODE}" STREQUAL "REQUIRED")
-            add_dependencies(${_dep}-projects ${name}-projects ${name}-make)
+            add_dependencies(${_dep}-projects ${name}-projects ${name}-all)
           endif()
         endif()
 
@@ -463,14 +463,14 @@ function(USE_EXTERNAL name)
     COMMAND ${CMAKE_COMMAND} -P ${BOOTSTRAPFILE})
   set_target_properties(${name}-bootstrap PROPERTIES FOLDER ${name}
     EXCLUDE_FROM_ALL ON EXCLUDE_FROM_DEFAULT_BUILD ON )
-  add_dependencies(${name}-make ${name}-bootstrap)
-  set_target_properties(${name}-make PROPERTIES FOLDER ${name})
+  add_dependencies(${name}-all ${name}-bootstrap)
+  set_target_properties(${name}-all PROPERTIES FOLDER ${name})
 
   foreach(_dep ${${NAME}_DEPENDS})
     get_target_property(_dep_check ${_dep} _EP_IS_EXTERNAL_PROJECT)
     if(_dep_check EQUAL 1)
       add_dependencies(${name}-resetall ${_dep}-resetall)
-      add_dependencies(${name}-make ${_dep}-make)
+      add_dependencies(${name}-all ${_dep}-all)
       if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         add_dependencies(${name}-snapshot_install ${_dep}-snapshot_install)
       endif()
