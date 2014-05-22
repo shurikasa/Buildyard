@@ -7,7 +7,7 @@ default:
 	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-only
 
 all:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-make
+	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-all
 
 configure:
 	@@CMAKE_COMMAND@ @CMAKE_BINARY_DIR@/@name@
