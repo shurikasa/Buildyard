@@ -321,7 +321,7 @@ configure_file(${_reqIn} ${_reqOut} COPYONLY)
 
   setup_scm(${name})
   set(_rmGeneratedLast)
-  foreach(_rmGenerated ${_generated})
+  foreach(_rmGenerated ${_generated} CMake/GitExternal.cmake)
     get_filename_component(_baseGenerated ${_rmGenerated} NAME)
     ExternalProject_Add_Step(${name} rm${_baseGenerated}
       COMMENT "Resetting ${_baseGenerated}"
