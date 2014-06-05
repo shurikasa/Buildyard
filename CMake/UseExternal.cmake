@@ -16,6 +16,7 @@ endif()
 include(CMakeParseArguments)
 include(ExternalProject)
 include(LSBInfo)
+include(Package)
 include(SCM)
 include(UseExternalAutoconf)
 include(UseExternalDeps)
@@ -79,6 +80,7 @@ function(USE_EXTERNAL_MAKE name)
   add_custom_target(${name}-only
     COMMAND ${cmd}
     COMMENT "Building only ${name}"
+    DEPENDS ${name}-bootstrap
     WORKING_DIRECTORY ${binary_dir})
   add_custom_target(${name}-all
     COMMAND ${cmd}
@@ -505,6 +507,8 @@ function(USE_EXTERNAL name)
   foreach(subtarget ${USE_EXTERNAL_SUBTARGETS})
     set_target_properties(${name}-${subtarget} PROPERTIES FOLDER ${name})
   endforeach()
+
+  package(${name})
 
   set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
   set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
