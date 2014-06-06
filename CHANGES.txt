@@ -6,7 +6,7 @@
     https://github.com/Eyescale/Buildyard/blob/master/doc/Presentation.pdf
 * Denoised CMake configuration run output
 * Improved update step
-** Rebase against origin, recoveri correctly on merge failure
+** Rebase against origin, recover correctly on merge failure
 ** Added option BUILDYARD_UPDATE_REBASE
 * Added option BUILDYARD_BUILD_OPTIONAL
 * Made "Could not find" message more informative
