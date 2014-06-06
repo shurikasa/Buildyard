@@ -4,7 +4,7 @@
 BUILD ?= Build
 
 default:
-	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-only
+	@$(MAKE) --no-print-directory -C @BUILDYARD@/$(BUILD)/@name@ install
 
 all:
 	@$(MAKE) --no-print-directory -C @BUILDYARD@ @name@-all

@@ -18,6 +18,7 @@ BUILD ?= Build
 normal: $(BUILD)/Makefile
 	@$(MAKE) --no-print-directory -C $(BUILD) makes pngs
 
+configure: $(BUILD)/Makefile
 all: debug release
 clean:
 	@-$(MAKE) --no-print-directory -C Build clean cleans
