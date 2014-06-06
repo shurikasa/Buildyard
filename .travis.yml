@@ -13,12 +13,14 @@ before_install:
  - sudo apt-get install -qq cppcheck || /bin/true
  - sudo apt-get install -qq doxygen || /bin/true
  - sudo apt-get install -qq flex || /bin/true
+ - sudo apt-get install -qq fop || /bin/true
  - sudo apt-get install -qq freeglut3-dev || /bin/true
  - sudo apt-get install -qq git || /bin/true
  - sudo apt-get install -qq git-review || /bin/true
  - sudo apt-get install -qq git-svn || /bin/true
  - sudo apt-get install -qq lcov || /bin/true
  - sudo apt-get install -qq libass-dev || /bin/true
+ - sudo apt-get install -qq libast2-dev || /bin/true
  - sudo apt-get install -qq libavahi-compat-libdnssd-dev || /bin/true
  - sudo apt-get install -qq libavcodec-dev || /bin/true
  - sudo apt-get install -qq libavdevice-dev || /bin/true
@@ -28,6 +30,7 @@ before_install:
  - sudo apt-get install -qq libboost-chrono-dev || /bin/true
  - sudo apt-get install -qq libboost-date-time-dev || /bin/true
  - sudo apt-get install -qq libboost-filesystem-dev || /bin/true
+ - sudo apt-get install -qq libboost-iostreams-dev || /bin/true
  - sudo apt-get install -qq libboost-program-options-dev || /bin/true
  - sudo apt-get install -qq libboost-python-dev || /bin/true
  - sudo apt-get install -qq libboost-regex-dev || /bin/true
@@ -35,9 +38,13 @@ before_install:
  - sudo apt-get install -qq libboost-system-dev || /bin/true
  - sudo apt-get install -qq libboost-test-dev || /bin/true
  - sudo apt-get install -qq libboost-thread-dev || /bin/true
+ - sudo apt-get install -qq libeigen3-dev || /bin/true
  - sudo apt-get install -qq libfcgi-dev || /bin/true
+ - sudo apt-get install -qq libflann-dev || /bin/true
  - sudo apt-get install -qq libgl1-mesa-dev || /bin/true
  - sudo apt-get install -qq libglewmx1.6-dev || /bin/true
+ - sudo apt-get install -qq libgoogle-perftools-dev || /bin/true
+ - sudo apt-get install -qq libgraphviz-dev || /bin/true
  - sudo apt-get install -qq libhdf5-serial-dev || /bin/true
  - sudo apt-get install -qq libhwloc-dev || /bin/true
  - sudo apt-get install -qq libibverbs-dev || /bin/true
@@ -47,23 +54,31 @@ before_install:
  - sudo apt-get install -qq libopenal-dev || /bin/true
  - sudo apt-get install -qq libopencv-dev || /bin/true
  - sudo apt-get install -qq libopenmpi-dev || /bin/true
+ - sudo apt-get install -qq libopenni-dev || /bin/true
  - sudo apt-get install -qq libopenscenegraph-dev || /bin/true
+ - sudo apt-get install -qq libpapi-dev || /bin/true
  - sudo apt-get install -qq libpoppler-dev || /bin/true
+ - sudo apt-get install -qq libqhull-dev || /bin/true
  - sudo apt-get install -qq libqt4-dev || /bin/true
  - sudo apt-get install -qq librdmacm-dev || /bin/true
  - sudo apt-get install -qq libspnav-dev || /bin/true
  - sudo apt-get install -qq libswscale-dev || /bin/true
+ - sudo apt-get install -qq libtbb-dev || /bin/true
  - sudo apt-get install -qq libtclap-dev || /bin/true
  - sudo apt-get install -qq libturbojpeg || /bin/true
+ - sudo apt-get install -qq libudev-dev || /bin/true
  - sudo apt-get install -qq libudt-dev || /bin/true
+ - sudo apt-get install -qq libunwind8-dev || /bin/true
  - sudo apt-get install -qq libvncserver-dev || /bin/true
  - sudo apt-get install -qq libvtk5-dev || /bin/true
  - sudo apt-get install -qq libx11-dev || /bin/true
  - sudo apt-get install -qq libxmu-dev || /bin/true
+ - sudo apt-get install -qq libxslt1-dev || /bin/true
  - sudo apt-get install -qq ninja-build || /bin/true
  - sudo apt-get install -qq openmpi-bin || /bin/true
  - sudo apt-get install -qq pkg-config || /bin/true
  - sudo apt-get install -qq subversion || /bin/true
+ - sudo apt-get install -qq tau || /bin/true
 script:
  - mkdir config.none
  - env TRAVIS=1 make -j2 debug
