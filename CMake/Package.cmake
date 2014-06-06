@@ -31,26 +31,19 @@ function(PACKAGE name)
     )
   add_custom_target(${name}-package
     COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release ..
-    COMMAND ${cmd} package
-    COMMENT "Build ${name} package"
+    COMMAND ${cmd} package-install
+    COMMENT "Build and sudo install ${name} package"
     WORKING_DIRECTORY "${${NAME}_SOURCE}/packagebuild"
     DEPENDS ${name}-packagedir ${name}-only
     )
-  if(LSB_DISTRIBUTOR_ID STREQUAL "Ubuntu")
-    add_custom_target(${name}-packageinstall
-      COMMAND sudo dpkg -i
-      COMMENT "sudo install ${name}"
-      DEPENDS ${name}-package
-    )
-  elseif(REDHAT)
-  endif()
+  add_dependencies(packages ${name}-package)
 
   foreach(_dep ${${NAME}_DEPENDS})
-
+    if(TARGET ${_dep}-package)
+      add_dependencies(${name}-package ${_dep}-package)
+    endif()
   endforeach()
 
   set_target_properties(${name}-packagedir PROPERTIES EXCLUDE_FROM_ALL ON)
   set_target_properties(${name}-package PROPERTIES EXCLUDE_FROM_ALL ON)
 endfunction()
-
-

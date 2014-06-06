@@ -1,6 +1,6 @@
 
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
-set(OPTIONAL_DEBS ninja-build lcov cppcheck git-svn)
+set(OPTIONAL_DEBS ninja-build lcov cppcheck git-svn abi-compliance-checker)
 
 function(USE_EXTERNAL_GATHER_INSTALL NAME)
   # sets ${NAME}_DEBS and ${NAME}_PORTS from all dependencies on return
