@@ -6,6 +6,7 @@ language: cpp
 # compiler: clang
 before_install:
  - sudo apt-get update -qq
+ - sudo apt-get install -qq abi-compliance-checker || /bin/true
  - sudo apt-get install -qq autoconf || /bin/true
  - sudo apt-get install -qq automake || /bin/true
  - sudo apt-get install -qq bison || /bin/true
@@ -48,6 +49,7 @@ before_install:
  - sudo apt-get install -qq libhdf5-serial-dev || /bin/true
  - sudo apt-get install -qq libhwloc-dev || /bin/true
  - sudo apt-get install -qq libibverbs-dev || /bin/true
+ - sudo apt-get install -qq libinsighttoolkit4-dev || /bin/true
  - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
  - sudo apt-get install -qq liblircclient-dev || /bin/true
  - sudo apt-get install -qq libogre-1.8-dev || /bin/true
@@ -79,6 +81,8 @@ before_install:
  - sudo apt-get install -qq pkg-config || /bin/true
  - sudo apt-get install -qq subversion || /bin/true
  - sudo apt-get install -qq tau || /bin/true
+ - sudo apt-get install -qq vagrant || /bin/true
+ - sudo apt-get install -qq virtualbox || /bin/true
 script:
  - mkdir config.none
  - env TRAVIS=1 make -j2 debug

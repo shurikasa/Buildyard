@@ -1,5 +1,5 @@
+### 2014.6
 
-                           ----- 2014.6 -----
 * Added ITK configuration
 * Renamed <Project>-make to <Project>-all
 * Update presentation
