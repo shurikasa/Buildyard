@@ -344,11 +344,6 @@ function(USE_EXTERNAL name)
   list(APPEND CMAKE_PREFIX_PATH ${INSTALL_PATH} /opt/local)
   list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 
-  set(ARGS ${${NAME}_ARGS} ${${NAME}_CMAKE_ARGS})
-  if(NOT Boost_FOUND)
-    list(APPEND ARGS -DBoost_NO_SYSTEM_PATHS=ON)
-  endif()
-
   set(CACHE_ARGS -DBUILDYARD:BOOL=ON
                  -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                  -DENABLE_COVERAGE:STRING=${ENABLE_COVERAGE}
@@ -357,12 +352,16 @@ function(USE_EXTERNAL name)
                  -DCMAKE_PREFIX_PATH:PATH=${INSTALL_PATH}
                  -DCMAKE_OSX_ARCHITECTURES:STRING=${CMAKE_OSX_ARCHITECTURES}
                  -DCMAKE_OSX_SYSROOT:STRING=${CMAKE_OSX_SYSROOT}
-                 -DBoost_NO_BOOST_CMAKE:BOOL=ON
                  # module info comes from config.*/Buildyard.cmake
                  -DMODULE_SW_BASEDIR:INTERNAL=${MODULE_SW_BASEDIR}
                  -DMODULE_MODULEFILES:INTERNAL=${MODULE_MODULEFILES}
                  -DMODULE_SW_CLASS:INTERNAL=${MODULE_SW_CLASS}
                  -DMODULE_SNAPSHOT_DIR:INTERNAL=${MODULE_SNAPSHOT_DIR})
+
+  find_package(Boost QUIET)
+  if(NOT Boost_FOUND)   # Fix find of non-system Boost
+    list(APPEND CACHE_ARGS -DBoost_NO_SYSTEM_PATHS:BOOL=ON)
+  endif()
 
   ExternalProject_Add(${name}
     LIST_SEPARATOR !
@@ -374,7 +373,7 @@ function(USE_EXTERNAL name)
     ${REPOSITORY} ${${NAME}_REPO_URL}
     ${REPO_TAG} ${${NAME}_REPO_TAG}
     UPDATE_COMMAND ${UPDATE_CMD}
-    CMAKE_ARGS ${ARGS}
+    CMAKE_ARGS ${${NAME}_CMAKE_ARGS}
     CMAKE_CACHE_ARGS ${CACHE_ARGS}
     TEST_AFTER_INSTALL 1
     ${${NAME}_EXTRA}
