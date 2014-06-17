@@ -7,6 +7,8 @@ find_package(Subversion)
 
 option(BUILDYARD_UPDATE_REBASE
   "Try to merge fetched updates for project source folders" ON)
+option(BUILDYARD_FORCE_BUILD "Force building non-optional projects from source"
+  ON)
 if(TRAVIS)
   option(BUILDYARD_BUILD_OPTIONAL "Build optional project dependencies" OFF)
 else()
@@ -184,6 +186,9 @@ function(USE_EXTERNAL name)
   list(APPEND CMAKE_MODULE_PATH /usr/local/share/${name}/CMake)
 
   # try find_package
+  if(BUILDYARD_FORCE_BUILD AND NOT ${NAME}_OPTIONAL AND ${NAME}_REPO_URL)
+    set(${NAME}_FORCE_BUILD ON)
+  endif()
   if(NOT ${NAME}_FORCE_BUILD)
     if(USE_EXTERNAL_COMPONENTS)
       string(REGEX REPLACE  " " ";" USE_EXTERNAL_COMPONENTS

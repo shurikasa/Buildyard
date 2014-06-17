@@ -50,6 +50,8 @@ BUILD=[directory]; make'.
   source folder. Default on. Aborts the rebase on merge conflicts.
 * BUILDYARD_BUILD_OPTIONAL: Build optional dependencies when building a
   project. Default on.
+* BUILDYARD_FORCE_BUILD: Force building all non-optional projects from
+  source, if they have a source code repository configured. Default off.
 
 ## Targets
 
