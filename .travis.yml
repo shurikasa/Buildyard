@@ -80,8 +80,6 @@ before_install:
  - sudo apt-get install -qq pkg-config || /bin/true
  - sudo apt-get install -qq subversion || /bin/true
  - sudo apt-get install -qq tau || /bin/true
- - sudo apt-get install -qq vagrant || /bin/true
- - sudo apt-get install -qq virtualbox || /bin/true
 script:
  - mkdir config.none
  - env TRAVIS=1 make -j2 debug
