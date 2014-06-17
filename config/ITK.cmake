@@ -3,3 +3,7 @@ set(ITK_REPO_URL http://itk.org/ITK.git)
 set(ITK_REPO_TAG release)
 set(ITK_OPTIONAL ON)
 set(ITK_CMAKE_INCLUDE "SYSTEM")
+
+#see ubuntu bug 1328924
+set(ITK_CMAKE_ARGS -DITK_USE_SYSTEM_HDF5=ON)
+set(ITK_FORCE_BUILD ON)
