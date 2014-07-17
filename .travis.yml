@@ -12,6 +12,7 @@ before_install:
  - sudo apt-get install -qq bison || /bin/true
  - sudo apt-get install -qq cmake || /bin/true
  - sudo apt-get install -qq cppcheck || /bin/true
+ - sudo apt-get install -qq cython || /bin/true
  - sudo apt-get install -qq doxygen || /bin/true
  - sudo apt-get install -qq flex || /bin/true
  - sudo apt-get install -qq fop || /bin/true
@@ -79,6 +80,7 @@ before_install:
  - sudo apt-get install -qq ninja-build || /bin/true
  - sudo apt-get install -qq openmpi-bin || /bin/true
  - sudo apt-get install -qq pkg-config || /bin/true
+ - sudo apt-get install -qq python-nose || /bin/true
  - sudo apt-get install -qq subversion || /bin/true
  - sudo apt-get install -qq tau || /bin/true
 script:
