@@ -9,7 +9,7 @@ option(BUILDYARD_UPDATE_REBASE
   "Try to merge fetched updates for project source folders" ON)
 option(BUILDYARD_FORCE_BUILD "Force building non-optional projects from source"
   ON)
-if(TRAVIS)
+if(TRAVIS OR BUILDYARD_BOOTSTRAP)
   option(BUILDYARD_BUILD_OPTIONAL "Build optional project dependencies" OFF)
 else()
   option(BUILDYARD_BUILD_OPTIONAL "Build optional project dependencies" ON)
