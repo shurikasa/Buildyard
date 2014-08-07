@@ -16,7 +16,7 @@ else
 BUILD ?= Build
 
 normal: $(BUILD)/Makefile
-	@$(MAKE) --no-print-directory -C $(BUILD) makes pngs
+	@$(MAKE) --no-print-directory -C $(BUILD) alls pngs
 
 configure: $(BUILD)/Makefile
 all: debug release
