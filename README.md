@@ -52,6 +52,8 @@ BUILD=[directory]; make'.
   project. Default on.
 * BUILDYARD_FORCE_BUILD: Force building all non-optional projects from
   source, if they have a source code repository configured. Default off.
+* BUILDYARD_INSTALL_PATH: Change the path for installed artifacts produced
+  by the projects. Default [directory]/install.
 
 ## Targets
 
