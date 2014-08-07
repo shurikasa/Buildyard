@@ -121,7 +121,27 @@ endif()
 set(TARBALL_CHAIN create)
 
 list(SORT _dirs) # read config/ first
-foreach(_dir ${_dirs})
+
+# Prune list of directories to only contain leafs of dependency tree
+# This ensures correct read order wrt depends.txt.
+set(_leafs ${_dirs})
+foreach(DIR ${_dirs})
+  if(EXISTS ${DIR}/depends.txt)
+    file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
+    string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
+      "${READ_CONFIG_DIR_DEPENDS}")
+  endif()
+
+  list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
+  while(READ_CONFIG_DIR_DEPENDS_LEFT GREATER 2)
+    list(GET READ_CONFIG_DIR_DEPENDS 0 READ_CONFIG_DIR_DEPENDS_DIR)
+    list(REMOVE_ITEM _leafs ${CMAKE_CURRENT_SOURCE_DIR}/${READ_CONFIG_DIR_DEPENDS_DIR})
+    list(REMOVE_AT READ_CONFIG_DIR_DEPENDS 0 1 2)
+    list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
+  endwhile()
+endforeach()
+
+foreach(_dir ${_leafs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
     read_config_dir("${_dir}")
   endif()
