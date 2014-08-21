@@ -9,16 +9,17 @@ projects from installed packages, git or svn repositories. The following
 projects are currently available, with optional projects drawn as
 dotted bubbles, and optional dependencies linked using dotted arrows:
 
-![Depency Graph](http://eyescale.github.com/images/all.png)
+![Dependency Graph](http://eyescale.github.com/images/all.png)
 
 ### Visual Studio
 
 It is highly recommended to install a precompiled boost version using
-the installers provided by BoostPro.
+the installers provided on SourceForge
+(http://sourceforge.net/projects/boost/files/boost-binaries).
 
 Use cmake to generate a Visual Studio Solution. Open this solution and
-build it at least once to download and install all dependencies. See
-'Targets' below for more details.
+build it at least once the 'build' target to download and install all
+dependencies. See 'Targets' below for more details.
 
 For development, open [build]/[Project]/[Project].sln and work there as
 usual. This solution will build the (pre-configured) project without
@@ -52,7 +53,7 @@ BUILD=[directory]; make'.
   project. Default on.
 * BUILDYARD_FORCE_BUILD: Force building all non-optional projects from
   source, if they have a source code repository configured. Default off.
-* BUILDYARD_INSTALL_PATH: Change the path for installed artifacts produced
+* BUILDYARD_INSTALL_PATH: Change the path for installed artefacts produced
   by the projects. Default [directory]/install.
 
 ## Targets
@@ -60,7 +61,7 @@ BUILD=[directory]; make'.
 ### Generic Targets
 
 The per-project targets below are also available as aggregate targets
-for all projects, e.g., 'makes' builds all projects.
+for all projects, e.g., 'alls' builds all projects.
 
 * apt-get: Install all packages using apt-get on Ubuntu.
 * port-get: Install all MacPorts packages needed on Mac OS X.
@@ -209,5 +210,5 @@ sudo port install Equalizer +universal
 
 ## Known issues
 
-* Boost build not automatically triggered on VS2010
+* Boost build not automatically triggered on VS2010 and later
 ([#17](https://github.com/Eyescale/Buildyard/issues/17))
