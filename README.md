@@ -18,7 +18,7 @@ the installers provided on SourceForge
 (http://sourceforge.net/projects/boost/files/boost-binaries).
 
 Use cmake to generate a Visual Studio Solution. Open this solution and
-build it at least once the 'build' target to download and install all
+build at least once the 'build' target to download and install all
 dependencies. See 'Targets' below for more details.
 
 For development, open [build]/[Project]/[Project].sln and work there as
