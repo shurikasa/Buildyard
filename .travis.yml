@@ -50,6 +50,7 @@ before_install:
  - sudo apt-get install -qq libhwloc-dev || /bin/true
  - sudo apt-get install -qq libibverbs-dev || /bin/true
  - sudo apt-get install -qq libjpeg-turbo8-dev || /bin/true
+ - sudo apt-get install -qq libleveldb-dev || /bin/true
  - sudo apt-get install -qq liblircclient-dev || /bin/true
  - sudo apt-get install -qq libogre-1.8-dev || /bin/true
  - sudo apt-get install -qq libopenal-dev || /bin/true
@@ -65,7 +66,6 @@ before_install:
  - sudo apt-get install -qq libspnav-dev || /bin/true
  - sudo apt-get install -qq libswscale-dev || /bin/true
  - sudo apt-get install -qq libtbb-dev || /bin/true
- - sudo apt-get install -qq libtclap-dev || /bin/true
  - sudo apt-get install -qq libturbojpeg || /bin/true
  - sudo apt-get install -qq libudev-dev || /bin/true
  - sudo apt-get install -qq libudt-dev || /bin/true
