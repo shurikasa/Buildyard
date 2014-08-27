@@ -304,14 +304,14 @@ else()
   set(${NAME}_REPO_TAG master)
 endif()
 set(${NAME}_FORCE_BUILD ON)
-set(${NAME}_SOURCE \${PROJECT_SOURCE_DIR})")
+set(${NAME}_SOURCE \${CMAKE_SOURCE_DIR})")
 
   file(WRITE ${_dependsIn}
     "config.${${NAME}_GROUP} ${${${NAME}_GROUP}_CONFIGURL} master")
 
   file(WRITE ${_scriptdir}/writeDeps.cmake "
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
-  ${PROJECT_SOURCE_DIR}/CMake/common)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake
+  ${CMAKE_SOURCE_DIR}/CMake/common)
 include(UpdateFile)
 configure_file(${_fpIn} ${_fpOut} COPYONLY)
 configure_file(${_ciIn} ${_ciOut} COPYONLY)
@@ -334,7 +334,7 @@ configure_file(${_reqIn} ${_reqOut} COPYONLY)
 
   ExternalProject_Add_Step(${name} Generate
     COMMENT "Updating ${_generated}"
-    COMMAND ${CMAKE_COMMAND} -DBUILDYARD:PATH=${PROJECT_SOURCE_DIR}
+    COMMAND ${CMAKE_COMMAND} -DBUILDYARD:PATH=${CMAKE_SOURCE_DIR}
             -P ${_scriptdir}/writeDeps.cmake
     DEPENDEES update DEPENDERS configure DEPENDS ${${NAME}_CONFIGFILE}
     )
