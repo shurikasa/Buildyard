@@ -6,7 +6,6 @@ set(BOOST_REPO_TAG boost-1.56.0)
 set(BOOST_SOURCE "${CMAKE_SOURCE_DIR}/src/Boost")
 set(BOOST_OPTIONAL ON)
 set(BOOST_CMAKE_INCLUDE "SYSTEM")
-
 set(BOOST_BUILD_LIBRARIES serialization system regex date_time thread filesystem
                           program_options test)
 find_package(PythonLibs QUIET)
@@ -44,7 +43,7 @@ if(MSVC)
   string(REGEX REPLACE ";" " " WITH_LIBRARIES ${WITH_LIBRARIES})
   file(WRITE "${BATFILE}"
     "set VS_UNICODE_OUTPUT=\n"
-    "b2 --layout=tagged toolset=${TOOLSET} address-model=${ADDRESS} ${WITH_LIBRARIES} link=shared \"--prefix=${CMAKE_CURRENT_BINARY_DIR}/install\" %1 %2 %3 %4\n"
+    "b2 --layout=tagged toolset=${TOOLSET} address-model=${ADDRESS} ${WITH_LIBRARIES} link=shared threading=multi \"--prefix=${CMAKE_CURRENT_BINARY_DIR}/install\" %1 %2 %3 %4\n"
 )
   set(BOOTSTRAP bootstrap.bat)
   set(BTWO ${BATFILE})
@@ -56,16 +55,16 @@ else()
   set(BOOTSTRAP ./bootstrap.sh "--prefix=${CMAKE_CURRENT_BINARY_DIR}/install" --with-libraries=${WITH_LIBRARIES})
   set(BTWO ./b2)
   if(APPLE)
-    set(BTWO ${BTWO} address-model=32_64)
+    set(BTWO ${BTWO} --layout=tagged address-model=32_64 threading=multi)
   elseif("$ENV{CC}}" MATCHES "xlc")
-    set(BTWO ${BTWO} toolset=vacpp address-model=64 cxxflags=-qsmp=omp:noopt)
+    set(BTWO ${BTWO} --layout=tagged toolset=vacpp address-model=64 cxxflags=-qsmp=omp:noopt threading=multi)
   else()
-    set(BTWO ${BTWO} toolset=gcc)
+    set(BTWO ${BTWO} --layout=tagged toolset=gcc threading=multi)
   endif()
 endif()
 
 set(BOOST_EXTRA
   CONFIGURE_COMMAND cd ${BOOST_SOURCE} && ${BOOTSTRAP}
   BUILD_COMMAND cd ${BOOST_SOURCE} && ${BTWO} -j8
-  INSTALL_COMMAND cd ${BOOST_SOURCE} && ${BTWO} headers -j8 install
+  INSTALL_COMMAND cd ${BOOST_SOURCE} && ${BTWO} headers -j8 install threading=multi link=shared
 )
