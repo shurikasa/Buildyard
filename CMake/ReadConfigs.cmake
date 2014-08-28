@@ -13,7 +13,8 @@ else()
   find_program(TAR_EXE tar)
 endif()
 
-set(INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install")
+set(BUILDYARD_INSTALL_PATH "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH
+  "Install directory for artifacts produced by all projects")
 
 find_program(AUTORECONF_EXE autoreconf)
 if(NOT MSVC AND NOT AUTORECONF_EXE)
@@ -39,6 +40,20 @@ macro(READ_CONFIG_DIR DIR)
         "${READ_CONFIG_DIR_DEPENDS}")
     endif()
 
+    # extract stable tags if config.stable
+    if("${DIR}" MATCHES "config.stable$")
+      set(READ_CONFIG_DIR_DEPENDS_COPY ${READ_CONFIG_DIR_DEPENDS})
+      list(LENGTH READ_CONFIG_DIR_DEPENDS_COPY READ_CONFIG_DIR_DEPENDS_LEFT)
+      while(READ_CONFIG_DIR_DEPENDS_LEFT GREATER 2)
+        list(GET READ_CONFIG_DIR_DEPENDS_COPY 0 READ_CONFIG_DIR_DEPENDS_DIR)
+        list(GET READ_CONFIG_DIR_DEPENDS_COPY 2 READ_CONFIG_DIR_DEPENDS_TAG)
+        list(REMOVE_AT READ_CONFIG_DIR_DEPENDS_COPY 0 1 2)
+        list(LENGTH READ_CONFIG_DIR_DEPENDS_COPY READ_CONFIG_DIR_DEPENDS_LEFT)
+        set_property(GLOBAL PROPERTY STABLE_TAG_${READ_CONFIG_DIR_DEPENDS_DIR}
+                                     ${READ_CONFIG_DIR_DEPENDS_TAG})
+      endwhile()
+    endif()
+
     list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
     while(READ_CONFIG_DIR_DEPENDS_LEFT GREATER 2)
       list(GET READ_CONFIG_DIR_DEPENDS 0 READ_CONFIG_DIR_DEPENDS_DIR)
@@ -46,6 +61,13 @@ macro(READ_CONFIG_DIR DIR)
       list(GET READ_CONFIG_DIR_DEPENDS 2 READ_CONFIG_DIR_DEPENDS_TAG)
       list(REMOVE_AT READ_CONFIG_DIR_DEPENDS 0 1 2)
       list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
+
+      # use stable tag if config.stable
+      get_property(STABLE_TAG GLOBAL PROPERTY STABLE_TAG_${READ_CONFIG_DIR_DEPENDS_DIR})
+      if(STABLE_TAG)
+        set(READ_CONFIG_DIR_DEPENDS_TAG ${STABLE_TAG})
+      endif()
+
       set(READ_CONFIG_DIR_DEPENDS_DIR
         "${CMAKE_CURRENT_SOURCE_DIR}/${READ_CONFIG_DIR_DEPENDS_DIR}")
 
@@ -120,7 +142,27 @@ endif()
 set(TARBALL_CHAIN create)
 
 list(SORT _dirs) # read config/ first
-foreach(_dir ${_dirs})
+
+# Prune list of directories to only contain leafs of dependency tree
+# This ensures correct read order wrt depends.txt.
+set(_leafs ${_dirs})
+foreach(DIR ${_dirs})
+  if(EXISTS ${DIR}/depends.txt)
+    file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
+    string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
+      "${READ_CONFIG_DIR_DEPENDS}")
+  endif()
+
+  list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
+  while(READ_CONFIG_DIR_DEPENDS_LEFT GREATER 2)
+    list(GET READ_CONFIG_DIR_DEPENDS 0 READ_CONFIG_DIR_DEPENDS_DIR)
+    list(REMOVE_ITEM _leafs ${CMAKE_CURRENT_SOURCE_DIR}/${READ_CONFIG_DIR_DEPENDS_DIR})
+    list(REMOVE_AT READ_CONFIG_DIR_DEPENDS 0 1 2)
+    list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
+  endwhile()
+endforeach()
+
+foreach(_dir ${_leafs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
     read_config_dir("${_dir}")
   endif()

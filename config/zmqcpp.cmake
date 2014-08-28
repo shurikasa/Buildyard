@@ -10,7 +10,7 @@ set(ZMQCPP_EXTRA
     CONFIGURE_COMMAND touch ${CMAKE_BINARY_DIR}
     BUILD_COMMAND touch ${CMAKE_BINARY_DIR}
     INSTALL_COMMAND
-        ${CMAKE_COMMAND} -E make_directory ${INSTALL_PATH}/include/ &&
+        ${CMAKE_COMMAND} -E make_directory ${BUILDYARD_INSTALL_PATH}/include/ &&
         # Copy header
-        ${CMAKE_COMMAND} -E copy_if_different ${ZMQCPP_SOURCE}/zmq.hpp ${INSTALL_PATH}/include/
+        ${CMAKE_COMMAND} -E copy_if_different ${ZMQCPP_SOURCE}/zmq.hpp ${BUILDYARD_INSTALL_PATH}/include/
 )
