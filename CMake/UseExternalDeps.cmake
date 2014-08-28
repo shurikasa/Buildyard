@@ -1,6 +1,6 @@
 
 # Copyright (c) 2012 Stefan Eilemann <Stefan.Eilemann@epfl.ch>
-set(OPTIONAL_DEBS ninja-build lcov cppcheck git-svn)
+set(OPTIONAL_DEBS ninja-build lcov cppcheck git-svn clang clang-format-3.5)
 
 function(USE_EXTERNAL_GATHER_INSTALL NAME)
   # sets ${NAME}_DEBS and ${NAME}_PORTS from all dependencies on return
@@ -16,8 +16,8 @@ function(USE_EXTERNAL_GATHER_INSTALL NAME)
     list(APPEND PORTS ${${PROJ}_PORTS})
   endforeach()
 
-  list(APPEND DEBS ${${NAME}_DEB_DEPENDS})
-  list(APPEND PORTS ${${NAME}_PORT_DEPENDS})
+  list(APPEND DEBS ${${NAME}_DEB_DEPENDS} ${${NAME}_DEB_NAME})
+  list(APPEND PORTS ${${NAME}_PORT_DEPENDS} ${${NAME}_PORT_NAME})
   if(DEBS)
     list(REMOVE_DUPLICATES DEBS)
     list(SORT DEBS)

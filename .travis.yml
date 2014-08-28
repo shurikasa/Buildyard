@@ -9,6 +9,8 @@ before_install:
  - sudo apt-get install -qq autoconf || /bin/true
  - sudo apt-get install -qq automake || /bin/true
  - sudo apt-get install -qq bison || /bin/true
+ - sudo apt-get install -qq clang || /bin/true
+ - sudo apt-get install -qq clang-format-3.5 || /bin/true
  - sudo apt-get install -qq cmake || /bin/true
  - sudo apt-get install -qq cppcheck || /bin/true
  - sudo apt-get install -qq cython || /bin/true
@@ -62,7 +64,6 @@ before_install:
  - sudo apt-get install -qq libspnav-dev || /bin/true
  - sudo apt-get install -qq libswscale-dev || /bin/true
  - sudo apt-get install -qq libtbb-dev || /bin/true
- - sudo apt-get install -qq libtclap-dev || /bin/true
  - sudo apt-get install -qq libturbojpeg || /bin/true
  - sudo apt-get install -qq libudt-dev || /bin/true
  - sudo apt-get install -qq libunwind8-dev || /bin/true
