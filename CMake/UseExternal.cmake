@@ -361,8 +361,8 @@ function(USE_EXTERNAL name)
                  -DMODULE_SW_CLASS:INTERNAL=${MODULE_SW_CLASS}
                  -DMODULE_SNAPSHOT_DIR:INTERNAL=${MODULE_SNAPSHOT_DIR})
 
-  find_package(Boost QUIET)
-  if(NOT Boost_FOUND)   # Fix find of non-system Boost
+  # Fix find of non-system Boost
+  if(NOT "$ENV{BOOST_ROOT}" STREQUAL "" OR NOT "$ENV{BOOST_LIBRARYDIR}" STREQUAL "")
     list(APPEND CACHE_ARGS -DBoost_NO_SYSTEM_PATHS:BOOL=ON)
   endif()
 
