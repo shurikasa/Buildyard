@@ -72,6 +72,7 @@ before_install:
  - sudo apt-get install -qq libx11-dev || /bin/true
  - sudo apt-get install -qq libxmu-dev || /bin/true
  - sudo apt-get install -qq libxslt1-dev || /bin/true
+ - sudo apt-get install -qq libzmq-dev || /bin/true
  - sudo apt-get install -qq ninja-build || /bin/true
  - sudo apt-get install -qq openmpi-bin || /bin/true
  - sudo apt-get install -qq pkg-config || /bin/true
