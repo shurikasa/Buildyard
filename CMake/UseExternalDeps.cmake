@@ -280,9 +280,9 @@ endif()
     "endif()\n"
     "if(FIND_PACKAGES_FOUND)\n"
     "  if(MSVC)\n"
-    "    message(STATUS \"Configured ${PROJECT_NAME} with \${FIND_PACKAGES_FOUND}\")\n"
+    "    message(STATUS \"Configured \${PROJECT_NAME} with \${FIND_PACKAGES_FOUND}\")\n"
     "  else()\n"
-    "    message(STATUS \"Configured ${PROJECT_NAME} with \${CMAKE_BUILD_TYPE}\${FIND_PACKAGES_FOUND}\")\n"
+    "    message(STATUS \"Configured \${PROJECT_NAME} with \${CMAKE_BUILD_TYPE}\${FIND_PACKAGES_FOUND}\")\n"
     "  endif()\n"
     "endif()\n"
     )

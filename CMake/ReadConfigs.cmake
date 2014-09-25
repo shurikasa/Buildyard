@@ -26,6 +26,20 @@ if(NOT MSVC AND NOT AUTORECONF_EXE)
   endif()
 endif()
 
+# In: config dir; Out: READ_CONFIG_DIR_DEPENDS list of tokens
+macro(READ_CONFIG_DIR_DEPENDS DIR)
+  set(READ_CONFIG_DIR_DEPENDS)
+  if(EXISTS ${DIR}/depends.txt)
+    file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
+    string(REGEX REPLACE "#[^\n]*" "" READ_CONFIG_DIR_DEPENDS
+      "${READ_CONFIG_DIR_DEPENDS}")
+    string(REGEX REPLACE "^\n" "" READ_CONFIG_DIR_DEPENDS
+      "${READ_CONFIG_DIR_DEPENDS}")
+    string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
+      "${READ_CONFIG_DIR_DEPENDS}")
+  endif()
+endmacro()
+
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "message(\"\n")
 macro(READ_CONFIG_DIR DIR)
   get_property(READ_CONFIG_DIR_DONE GLOBAL PROPERTY READ_CONFIG_DIR_${DIR})
@@ -33,12 +47,7 @@ macro(READ_CONFIG_DIR DIR)
     set_property(GLOBAL PROPERTY READ_CONFIG_DIR_${DIR} ON) # mark being parsed
 
     # Read all dependencies first
-    set(READ_CONFIG_DIR_DEPENDS)
-    if(EXISTS ${DIR}/depends.txt)
-      file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
-      string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
-        "${READ_CONFIG_DIR_DEPENDS}")
-    endif()
+    read_config_dir_depends(${DIR})
 
     # extract stable tags if config.stable
     if("${DIR}" MATCHES "config.stable$")
@@ -147,11 +156,7 @@ list(SORT _dirs) # read config/ first
 # This ensures correct read order wrt depends.txt.
 set(_leafs ${_dirs})
 foreach(DIR ${_dirs})
-  if(EXISTS ${DIR}/depends.txt)
-    file(READ ${DIR}/depends.txt READ_CONFIG_DIR_DEPENDS)
-    string(REGEX REPLACE "[ \n]" ";" READ_CONFIG_DIR_DEPENDS
-      "${READ_CONFIG_DIR_DEPENDS}")
-  endif()
+  read_config_dir_depends(${DIR})
 
   list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
   while(READ_CONFIG_DIR_DEPENDS_LEFT GREATER 2)
