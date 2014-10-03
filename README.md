@@ -45,6 +45,12 @@ Custom CMake binary directories are supported and can be used through
 the top-level make using 'make BUILD=[directory]' or 'export
 BUILD=[directory]; make'.
 
+### Generic external dependencies
+
+Major open source packages, such as Qt or Boost, are assumed to be
+installed as packages on the system. If this is not the case, and they
+should be build from source, enable config.extra in config/depends.txt.
+
 ## Options
 
 * BUILDYARD_UPDATE_REBASE: Try to rebase fetched updates into the project
