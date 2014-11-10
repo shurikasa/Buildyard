@@ -147,6 +147,8 @@ It contains the following variables:
   step. The character '!' can be used to separate list items.
 * PROJECT\_AUTOCONF: when set to true, the autoconf build system is used to
   build the project.
+* PROJECT\_DEB\_NAME: Name of the debian package for this project. Used for
+  apt-get target.
 * PROJECT\_DEB\_DEPENDS: Debian package names of dependencies. Used for
   apt-get target and Travis CI configuration files.
 * PROJECT\_PORT\_DEPENDS: MacPorts package names of dependencies. Used
