@@ -323,6 +323,11 @@ function(USE_EXTERNAL name)
       return()
     endif()
     set(REPO_TAG SVN_REVISION)
+    set(REPO_USERNAME SVN_USERNAME ${${NAME}_REPO_USERNAME})
+    # The if statement distinguishes between empty and unset passwords.
+    if (DEFINED ${NAME}_REPO_PASSWORD)
+      set(REPO_PASSWORD SVN_PASSWORD "${${NAME}_REPO_PASSWORD}")
+    endif()
   elseif(REPO_TYPE STREQUAL "FILE")
     set(REPOSITORY URL)
   else()
@@ -379,6 +384,8 @@ function(USE_EXTERNAL name)
     DEPENDS "${DEPENDS}"
     ${REPOSITORY} ${${NAME}_REPO_URL}
     ${REPO_TAG} ${${NAME}_REPO_TAG}
+    ${REPO_USERNAME}
+    "${REPO_PASSWORD}" # This allows empty passwords
     UPDATE_COMMAND ${UPDATE_CMD}
     CMAKE_ARGS ${${NAME}_CMAKE_ARGS}
     CMAKE_CACHE_ARGS ${CACHE_ARGS}
