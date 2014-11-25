@@ -8,34 +8,36 @@ option(CREATE_DEPENDENCY_GRAPH_CLUSTERS
 
 function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
   string(TOUPPER ${name} NAME)
+  string(REPLACE "-" "_" title ${name})
+
   if(${NAME}_PACKAGE_VERSION)
-    set(label "${name}\\n${${NAME}_PACKAGE_VERSION}")
+    set(label "${title}\\n${${NAME}_PACKAGE_VERSION}")
   else()
-    set(label "${name}")
+    set(label "${title}")
   endif()
 
-  if(${NAME}_OPTIONAL OR NOT ${NAME}_PACKAGE_VERSION)
+  if(${NAME}_REPO_URL)
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
-      "${name} [style=dashed, label=\"${label}\"]\n")
-    file(APPEND ${FILE} "${name} [style=dashed, label=\"${label}\"]\n")
+      "${title} [style=solid, label=\"${label}\"]\n")
+    file(APPEND ${FILE} "${title} [style=solid, label=\"${label}\"]\n")
   else()
     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
-      "${name} [style=solid, label=\"${label}\"]\n")
-    file(APPEND ${FILE} "${name} [style=solid, label=\"${label}\"]\n")
+      "${title} [style=dashed, label=\"${label}\", fontsize=10]\n")
+    file(APPEND ${FILE} "${title} [style=dashed, label=\"${label}\"]\n")
   endif()
 
   if(CREATE_DEPENDENCY_GRAPH_CLUSTERS)
     if(${NAME}_DIR)
       string(REPLACE "." "" CLUSTER ${${NAME}_DIR})
       file(APPEND ${FILE}
-        "subgraph cluster_${CLUSTER} { color=gray label=\"${${NAME}_DIR}\" ${name}; }\n")
+        "subgraph cluster_${CLUSTER} { color=gray label=\"${${NAME}_DIR}\" ${title}; }\n")
       file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
-        "subgraph cluster_${CLUSTER} { color=gray label=\"${${NAME}_DIR}\" ${name}; }\n")
+        "subgraph cluster_${CLUSTER} { color=gray label=\"${${NAME}_DIR}\" ${title}; }\n")
     else()
       file(APPEND ${FILE}
-        "subgraph cluster_system { color=gray label=\"system\" ${name}; }\n")
+        "subgraph cluster_system { color=gray label=\"system\" ${title}; }\n")
       file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
-        "subgraph cluster_system { color=gray label=\"system\" ${name}; }\n")
+        "subgraph cluster_system { color=gray label=\"system\" ${title}; }\n")
     endif()
   endif()
 
@@ -46,10 +48,11 @@ function(CREATE_DEPENDENCY_GRAPH_R name ALL FILE)
     elseif(_dep STREQUAL "REQUIRED")
       set(DEPMODE solid)
     else()
+      string(REPLACE "-" "_" _dep ${_dep})
       file(APPEND ${FILE}
-        "\"${_dep}\" -> \"${name}\" [style = ${DEPMODE}]\n" )
+        "\"${_dep}\" -> \"${title}\" [style = ${DEPMODE}]\n" )
       file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${ALL}.dot
-        "\"${_dep}\" -> \"${name}\" [style = ${DEPMODE}]\n" )
+        "\"${_dep}\" -> \"${title}\" [style = ${DEPMODE}]\n" )
       create_dependency_graph_r(${_dep} ${ALL} ${FILE})
     endif()
   endforeach()
