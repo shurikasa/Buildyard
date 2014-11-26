@@ -138,6 +138,10 @@ It contains the following variables:
 * PROJECT\_REPO\_TYPE: optional, git, git-svn or svn. Default is git.
 * PROJECT\_REPO\_URL: git or svn repository URL.
 * PROJECT\_REPO\_TAG: The svn revision or git tag to use to build the project.
+* PROJECT\_REPO\_USERNAME: The username to access the repository. Currently
+  only for svn repositories.
+* PROJECT\_REPO\_PASSWORD: The password to access the repository. Currently
+  only for svn repositories.
 * PROJECT\_REPO\_DEPTH: Depth of the git clone for shallow clones.
 * PROJECT\_ROOT\_VAR: optional CMake variable name for the project root,
   as required by the project find script. Default is PROJECT\_ROOT.
