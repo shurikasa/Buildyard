@@ -16,6 +16,7 @@ else()
 endif()
 
 include(CMakeParseArguments)
+include(CommonPackage)
 include(ExternalProject)
 include(LSBInfo)
 include(Package)
@@ -139,7 +140,7 @@ endfunction()
 
 function(USE_EXTERNAL name)
   # Searches for an external project.
-  # * First searches using find_package taking into account:
+  # * First searches using common_package taking into account:
   # ** NAME_ROOT CMake and environment variables
   # ** .../share/name/CMake
   # ** Version is read from optional $name.cmake
@@ -185,7 +186,6 @@ function(USE_EXTERNAL name)
   list(APPEND CMAKE_MODULE_PATH /usr/share/${name}/CMake)
   list(APPEND CMAKE_MODULE_PATH /usr/local/share/${name}/CMake)
 
-  # try find_package
   if(BUILDYARD_FORCE_BUILD AND NOT ${NAME}_OPTIONAL AND ${NAME}_REPO_URL)
     set(${NAME}_FORCE_BUILD ON)
   endif()
@@ -193,27 +193,15 @@ function(USE_EXTERNAL name)
     if(USE_EXTERNAL_COMPONENTS)
       string(REGEX REPLACE  " " ";" USE_EXTERNAL_COMPONENTS
         ${USE_EXTERNAL_COMPONENTS})
-      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET ${${NAME}_FIND_ARGS}
-        COMPONENTS ${USE_EXTERNAL_COMPONENTS})
+      common_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET
+        ${${NAME}_FIND_ARGS} COMPONENTS ${USE_EXTERNAL_COMPONENTS})
     else()
-      find_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET
+      common_package(${name} ${${NAME}_PACKAGE_VERSION} QUIET
         ${${NAME}_FIND_ARGS})
     endif()
   endif()
   if(${NAME}_FOUND)
     set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
-  endif()
-  if(NOT ${name}_FOUND AND NOT ${NAME}_FORCE_BUILD) # try pkg-config
-    if(PKG_CONFIG_EXECUTABLE)
-      if(${NAME}_PACKAGE_VERSION)
-        pkg_check_modules(${NAME} QUIET ${name}>=${${NAME}_PACKAGE_VERSION})
-      else()
-        pkg_check_modules(${NAME} QUIET ${name})
-      endif()
-      if(${NAME}_FOUND)
-        set(${name}_FOUND 1) # compat with Foo_FOUND and FOO_FOUND usage
-      endif()
-    endif()
   endif()
   if(${name}_FOUND)
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name}_FOUND ON)
