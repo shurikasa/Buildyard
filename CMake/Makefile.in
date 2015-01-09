@@ -15,7 +15,7 @@ configure:
 test:
 	@$(MAKE) --no-print-directory -C @BUILDYARD@/$(BUILD)/@name@ tests
 
-include @BUILDYARD@/$(BUILD)/projects.make
+-include @BUILDYARD@/$(BUILD)/projects.make
 
 %:
 	@$(MAKE) --no-print-directory -C @BUILDYARD@/${BUILD}/@name@ $@
