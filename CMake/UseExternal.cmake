@@ -140,11 +140,12 @@ endfunction()
 
 function(USE_EXTERNAL name)
   # Searches for an external project.
-  # * First searches using common_package taking into account:
+  # * Searches using common_package taking into account:
   # ** NAME_ROOT CMake and environment variables
   # ** .../share/name/CMake
   # ** Version is read from optional $name.cmake
-  # * If no pre-installed package is found, use ExternalProject to get dependency
+  # * If no pre-installed package is found, use ExternalProject to
+  #   build dependency
   # ** External project settings are read from $name.cmake
 
   cmake_parse_arguments(USE_EXTERNAL "" "" "COMPONENTS" ${ARGN})
@@ -242,7 +243,7 @@ function(USE_EXTERNAL name)
           use_external(${_dep} COMPONENTS ${${NAME}_${_DEP}_COMPONENTS})
         endif()
         get_property(_found GLOBAL PROPERTY USE_EXTERNAL_${_dep}_FOUND)
-        if(TARGET ${_dep})
+        if(TARGET ${_dep} AND NOT TARGET ${_dep}-missing)
           list(APPEND DEPENDS ${_dep})
           if("${DEPMODE}" STREQUAL "REQUIRED")
             add_dependencies(${_dep}-projects ${name}-projects ${name}-all)
@@ -261,6 +262,11 @@ function(USE_EXTERNAL name)
       "Skip ${name}: missing${MISSING}\n")
     set_property(GLOBAL PROPERTY USE_EXTERNAL_${name} ON)
     set(SKIPPING ${SKIPPING} ${name} PARENT_SCOPE)
+    add_custom_target(${name}-missing # fake target to know that this is missing
+      COMMAND fail
+      COMMENT "Can't build ${name}: missing${MISSING}")
+    add_custom_target(${name} # target to inform  on 'make <project>'
+      DEPENDS ${name}-missing)
     return()
   endif()
 
@@ -475,7 +481,7 @@ function(USE_EXTERNAL name)
   set_target_properties(${name}-all PROPERTIES FOLDER ${name})
 
   foreach(_dep ${${NAME}_DEPENDS})
-    if(TARGET ${_dep})
+    if(TARGET ${_dep} AND NOT ${_dep}-missing)
       add_dependencies(${name}-resetall ${_dep}-resetall)
       add_dependencies(${name}-all ${_dep}-all)
       if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
