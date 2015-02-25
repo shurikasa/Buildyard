@@ -41,9 +41,7 @@ macro(READ_CONFIG_DIR_DEPENDS DIR)
 endmacro()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/info.cmake "message(\"\n")
-
-# In: config dir; Out: BUILDYARD_REV, TARBALL_CHAIN, ${DIR}_FILES
-function(READ_CONFIG_DIR DIR)
+macro(READ_CONFIG_DIR DIR)
   get_property(READ_CONFIG_DIR_DONE GLOBAL PROPERTY READ_CONFIG_DIR_${DIR})
   if(NOT READ_CONFIG_DIR_DONE) # Not already parsed
     set_property(GLOBAL PROPERTY READ_CONFIG_DIR_${DIR} ON) # mark being parsed
@@ -66,7 +64,6 @@ function(READ_CONFIG_DIR DIR)
     endif()
 
     list(LENGTH READ_CONFIG_DIR_DEPENDS READ_CONFIG_DIR_DEPENDS_LEFT)
-    set(_downstream_files)
     while(READ_CONFIG_DIR_DEPENDS_LEFT GREATER 2)
       list(GET READ_CONFIG_DIR_DEPENDS 0 READ_CONFIG_DIR_DEPENDS_DIR)
       list(GET READ_CONFIG_DIR_DEPENDS 1 READ_CONFIG_DIR_DEPENDS_REPO)
@@ -91,7 +88,6 @@ function(READ_CONFIG_DIR DIR)
         "${READ_CONFIG_DIR_DEPENDS_TAG}"
         RESET .travis.yml)
       read_config_dir(${READ_CONFIG_DIR_DEPENDS_DIR})
-      list(APPEND _downstream_files ${${READ_CONFIG_DIR_DEPENDS_DIR}_FILES})
     endwhile()
 
     # Read configurations in this configuration folder
@@ -107,23 +103,23 @@ function(READ_CONFIG_DIR DIR)
     if(EXISTS ${DIR}/Buildyard.txt) # deprecated, use Buildyard.cmake
       file(READ ${DIR}/Buildyard.txt BUILDYARD_REV)
       string(REGEX REPLACE "\n" "" BUILDYARD_REV "${BUILDYARD_REV}")
-      set(BUILDYARD_REV ${BUILDYARD_REV} PARENT_SCOPE)
+    endif()
+    if(EXISTS ${DIR}/Buildyard.cmake)
+      include(${DIR}/Buildyard.cmake)
     endif()
 
     file(RELATIVE_PATH BASEDIR ${CMAKE_CURRENT_SOURCE_DIR} ${DIR})
-    file(GLOB ${DIR}_FILES "${DIR}/*.cmake")
-    if(_downstream_files)
-      list(INSERT ${DIR}_FILES 0 ${_downstream_files})
-    endif()
-    set(${DIR}_FILES ${${DIR}_FILES} PARENT_SCOPE)
-    foreach(_file ${${DIR}_FILES})
+    file(GLOB _files "${DIR}/*.cmake")
+    foreach(_file ${_files})
       string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" _config ${_file})
       list(APPEND _localFiles ${_config})
 
       string(REPLACE ".cmake" "" NAME ${_config})
       get_filename_component(NAME ${NAME} NAME)
       string(TOUPPER ${NAME} NAME)
-      set(${NAME}_DIR ${BASEDIR} PARENT_SCOPE)
+      set(${NAME}_DIR ${BASEDIR})
+
+      include(${_file})
     endforeach()
 
     if(TAR_EXE)
@@ -133,11 +129,11 @@ function(READ_CONFIG_DIR DIR)
           COMMAND ${TAR_EXE} rf ${TARBALL} --transform 's:^:${CMAKE_PROJECT_NAME}-${VERSION}/:' -C "${CMAKE_CURRENT_SOURCE_DIR}" ${_localFiles}
           COMMENT "Adding ${DIRID}"
           DEPENDS tarball-${TARBALL_CHAIN})
-        set(TARBALL_CHAIN ${DIRID} PARENT_SCOPE)
+        set(TARBALL_CHAIN ${DIRID})
       endif()
     endif()
   endif()
-endfunction()
+endmacro()
 
 set(_configs)
 file(GLOB _dirs "${CMAKE_CURRENT_SOURCE_DIR}/config*")
@@ -174,14 +170,6 @@ endforeach()
 foreach(_dir ${_leafs})
   if(IS_DIRECTORY "${_dir}" AND NOT "${_dir}" MATCHES "config.local$")
     read_config_dir("${_dir}")
-
-    if(EXISTS ${_dir}/Buildyard.cmake)
-      include(${_dir}/Buildyard.cmake)
-    endif()
-
-    foreach(_file ${${_dir}_FILES})
-      include(${_file})
-    endforeach()
   endif()
 endforeach()
 
