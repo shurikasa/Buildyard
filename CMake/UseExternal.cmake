@@ -125,10 +125,9 @@ function(_ep_add_test_command name)
   if(cmd_set)
     get_property(cmd TARGET ${name} PROPERTY _EP_TEST_COMMAND)
   else()
-    _ep_get_build_command(${name} TEST cmd)
+    set(cmd ${CMAKE_CTEST_COMMAND} -T test --no-compress-output -E '^.*perf_.*')
   endif()
 
-  string(REGEX REPLACE "^(.*/)cmake([^/]*)$" "\\1ctest\\2" cmd "${cmd}")
   add_custom_target(${name}-test
     COMMAND ${cmd}
     COMMENT "Testing ${name}"
